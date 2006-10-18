@@ -237,7 +237,7 @@ buffer</string>
   <void method="connect"> 
    <object class="com.horstmann.violet.CallEdge"> 
     <void property="middleLabel"> 
-     <string>show buffer</string> 
+     <string>load buffer</string> 
     </void> 
    </object> 
    <object idref="CallNode0"/> 
