@@ -252,5 +252,10 @@ buffer</string>
    <object idref="CallNode3"/> 
    <object idref="CallNode4"/> 
   </void> 
+  <void method="connect"> 
+   <object class="com.horstmann.violet.ReturnEdge"/> 
+   <object idref="CallNode4"/> 
+   <object idref="CallNode3"/> 
+  </void> 
  </object> 
 </java> 
