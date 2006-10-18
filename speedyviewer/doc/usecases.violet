@@ -116,8 +116,8 @@
    </object> 
    <object class="java.awt.geom.Point2D$Double"> 
     <void method="setLocation"> 
-     <double>300.0</double> 
-     <double>100.0</double> 
+     <double>400.0</double> 
+     <double>150.0</double> 
     </void> 
    </object> 
   </void> 
@@ -127,6 +127,21 @@
     <void method="setLocation"> 
      <double>262.0</double> 
      <double>270.0</double> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="addNode"> 
+   <object id="UseCaseNode4" class="com.horstmann.violet.UseCaseNode"> 
+    <void property="name"> 
+     <void property="text"> 
+      <string>indexing</string> 
+     </void> 
+    </void> 
+   </object> 
+   <object class="java.awt.geom.Point2D$Double"> 
+    <void method="setLocation"> 
+     <double>170.0</double> 
+     <double>110.0</double> 
     </void> 
    </object> 
   </void> 
@@ -194,6 +209,21 @@
    <object class="com.horstmann.violet.NoteEdge"/> 
    <object idref="NoteNode0"/> 
    <object idref="PointNode0"/> 
+  </void> 
+  <void method="connect"> 
+   <object class="com.horstmann.violet.ClassRelationshipEdge"> 
+    <void property="endArrowHead"> 
+     <object class="com.horstmann.violet.ArrowHead" field="V"/> 
+    </void> 
+    <void property="lineStyle"> 
+     <object class="com.horstmann.violet.LineStyle" field="DOTTED"/> 
+    </void> 
+    <void property="middleLabel"> 
+     <string>«include»</string> 
+    </void> 
+   </object> 
+   <object idref="UseCaseNode0"/> 
+   <object idref="UseCaseNode4"/> 
   </void> 
  </object> 
 </java> 
