@@ -1,17 +1,26 @@
 package speedyviewer.util;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-
-public class CachedArray<T> implements List<T>
+/**
+ * Array that can grow without allocating additional chunks
+ * of memory. It will not free, reallocate and copy, but maintain
+ * an array of chunks, allocation new chunks when needed.
+ * 
+ * The operation set is quite limited, as removal of elements is
+ * not supported.
+ * 
+ */
+public class CachedArray<T>
 {
 	private Object[] cache;
 	private int length;
 	private int chunkSize;
 	private int levels;
 	
+	/**
+	 * Constructor.
+	 * 
+	 * @param chunkSize the size of the basic allocation unit.
+	 */
 	public CachedArray(int chunkSize)
 	{
 		this.chunkSize = chunkSize;
@@ -19,61 +28,60 @@ public class CachedArray<T> implements List<T>
 		levels = 1;
 	}
 
-	public boolean add(Object arg0)
+	/**
+	 * Add an object at the end of the array.
+	 *  
+	 * @param element element to add.
+	 * @return
+	 */
+	public boolean add(Object element)
 	{
 		int level;
 		
 		int chunkIndex;
 		int offset = length;
+		int levelSize = chunkSize;
 		Object[] chunk = cache;
 		
+		for(int i = 0 ; i < levels ; i++)
+			levelSize *= chunkSize;
+
 		for(level = 1 ; level < levels ; level++)
 		{
-			chunkIndex = offset / chunkSize;
-			offset = offset % chunkSize;
+			chunkIndex = offset / levelSize;
+			offset = offset % levelSize;
+
 			if(chunk[chunkIndex] == null)
 				chunk[chunkIndex] = new Object[chunkSize];
 			
 			chunk = (Object[])cache[chunkIndex];
-		}		
-		
-		
-		chunk[offset] = arg0;
+
+			levelSize = levelSize / chunkSize;
+		}
+				
+		chunk[offset] = element;
 
 		length++;
 
 		return true;
 	}
 
-	public void add(int index, Object arg1)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean addAll(Collection arg0)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean addAll(int arg0, Collection arg1)
-	{
-		throw new UnsupportedOperationException();
-	}
-
+	/**
+	 * Clears the array, no memory is deallocated.
+	 */
 	public void clear()
 	{
 		length = 0;
 	}
 
-	public boolean contains(Object arg0)
+	/**
+	 * Deallocates as much memory as possible.
+	 * In Java terms: removes references, giving the
+	 * memory to the GC.
+	 */
+	public void trim()
 	{
-		return false;
-	}
-
-	public boolean containsAll(Collection arg0)
-	{
-		// TODO Auto-generated method stub
-		return false;
+		// TODO
 	}
 
 	public T get(int index)
@@ -81,17 +89,30 @@ public class CachedArray<T> implements List<T>
 		if(index >= length || index < 0)
 			throw new IndexOutOfBoundsException();
 
-		int chunkIndex = index / chunkSize;
-		int offset = index % chunkSize;
+		int level;
 		
-		Object[] chunk = (Object[])cache[chunkIndex];
+		int chunkIndex;
+		int offset = length;
+		int levelSize = chunkSize;
+		Object[] chunk = cache;
+		
+		for(int i = 0 ; i < levels ; i++)
+			levelSize *= chunkSize;
+
+		for(level = 1 ; level < levels ; level++)
+		{
+			chunkIndex = offset / levelSize;
+			offset = offset % levelSize;
+
+			if(chunk[chunkIndex] == null)
+				chunk[chunkIndex] = new Object[chunkSize];
+			
+			chunk = (Object[])cache[chunkIndex];
+
+			levelSize = levelSize / chunkSize;
+		}
 
 		return (T) chunk[offset];
-	}
-
-	public int indexOf(Object arg0)
-	{
-		return 0;
 	}
 
 	public boolean isEmpty()
@@ -99,58 +120,37 @@ public class CachedArray<T> implements List<T>
 		return length == 0;
 	}
 
-	public Iterator<T> iterator()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	public int lastIndexOf(Object arg0)
+	public void set(int index, T element)
 	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public ListIterator<T> listIterator()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public ListIterator<T> listIterator(int arg0)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public boolean remove(Object arg0)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public T remove(int arg0)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public boolean removeAll(Collection arg0)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean retainAll(Collection arg0)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public T set(int arg0, Object arg1)
-	{
-		// TODO Auto-generated method stub
-		return null;
+		if(index > length || index < 0)
+			throw new IndexOutOfBoundsException();
+		else if(index == length)
+			add(element);
+		else
+		{
+			int level;
+			int chunkIndex;
+			int offset = index;
+			int levelSize = chunkSize;
+			Object[] chunk = cache;
+			
+			for(int i = 0 ; i < levels ; i++)
+				levelSize *= chunkSize;
+	
+			for(level = 1 ; level < levels ; level++)
+			{
+				chunkIndex = offset / levelSize;
+				offset = offset % levelSize;
+	
+				if(chunk[chunkIndex] == null)
+					chunk[chunkIndex] = new Object[chunkSize];
+				
+				chunk = (Object[])cache[chunkIndex];
+	
+				levelSize = levelSize / chunkSize;
+			}
+		}
 	}
 
 	public int size()
@@ -158,23 +158,11 @@ public class CachedArray<T> implements List<T>
 		return length;
 	}
 
-	public List<T> subList(int arg0, int arg1)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public Object[] toArray()
 	{
 		Object[] a = new Object[length];
 		
 		return a;
-	}
-
-	public Object[] toArray(Object[] arg0)
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
