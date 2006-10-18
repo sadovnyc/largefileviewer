@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Speedyviewer
-Bundle-SymbolicName: speedyviewer
+Bundle-SymbolicName: speedyviewer;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: speedyviewer.Activator
 Bundle-Vendor: noaltri
