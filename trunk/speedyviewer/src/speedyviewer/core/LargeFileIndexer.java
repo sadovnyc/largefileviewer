@@ -41,11 +41,18 @@ public class LargeFileIndexer
 		int offset = 0;
 		int line = 0;
 		int len;
+		long start = 0;
+		long computation = 0;
+		long reading = 0;
 	
 		FileInputStream inputStream = new FileInputStream(file);
 	
+		start = System.currentTimeMillis();
+
 		while( (len = inputStream.read(buffer)) > 0)
 		{
+			reading += System.currentTimeMillis() - start;
+			start = System.currentTimeMillis();
 			for(int i=0 ; i < len ; i++)
 			{
 				//check for newline: ascii code 10
@@ -64,12 +71,15 @@ public class LargeFileIndexer
 			}
 			//going to read next buffer, update offset
 			offset += len;
+			computation += System.currentTimeMillis() - start;
+			start = System.currentTimeMillis();
 		}
 		
 		//last chunk (if not completely filled)
 		if(line > 0)
 			sendIndexChunk(indexChunk, line);
-	
+
+		System.out.println("computation time (ms):" + computation + "reading time (ms):" + reading);
 		inputStream.close();
 	}
 	

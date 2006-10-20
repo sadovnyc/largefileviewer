@@ -52,7 +52,7 @@ public class SpeedyView extends ViewPart {
 			System.out.println("Starting");
 			long start = System.currentTimeMillis();
 			LargeFileIndexer indexer = new LargeFileIndexer(64*1024);
-			indexer.parallelIndex(new File("C:\\ccviews\\fia060925_avm.prv\\result\\vc7\\Lgreg_high_optiverse_tri_band_all_gcc.txt"));
+			indexer.index(new File("C:\\ccviews\\fia060925_avm.prv\\result\\vc7\\Lgreg_high_optiverse_tri_band_all_gcc.txt"));
 			System.out.println("Elapsed Time (ms): " + (System.currentTimeMillis() - start));
 			System.out.println("Lines counted: " + indexer.getLineCount());
 		} catch (FileNotFoundException e) {
