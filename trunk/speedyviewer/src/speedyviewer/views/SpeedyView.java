@@ -7,7 +7,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.part.ViewPart;
 
-import speedyviewer.core.LargeFileIndexer;
+import speedyviewer.core.FileIndexer;
 import speedyviewer.core.IIndexerListener;
 import speedyviewer.core.IndexerThread;
 
@@ -41,7 +41,7 @@ public class SpeedyView extends ViewPart
 	};
 
 	private IIndexerListener listener = new IIndexerListener() {
-		public void newIndexChunk(LargeFileIndexer indexer)
+		public void newIndexChunk(FileIndexer indexer)
 		{
 			//run update in the UI thread (this listener is called
 			//from the indexer thread and can not call UI methods)

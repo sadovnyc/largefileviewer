@@ -16,7 +16,7 @@ public class IndexerThread extends Thread
 	private File file;
 
 	//the indexer
-	private LargeFileIndexer indexer;
+	private FileIndexer indexer;
 	
 	/**
 	 * Creates a thread to index the given file.
@@ -28,7 +28,7 @@ public class IndexerThread extends Thread
 	{
 		super("indexing:" + file.getPath());
 		this.file = file;
-		this.indexer = new LargeFileIndexer(chunkSize);
+		this.indexer = new FileIndexer(chunkSize);
 	}
 
 	/**
