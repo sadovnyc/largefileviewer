@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.Exchanger;
 
-public class DualThreadIndexer extends LargeFileIndexer
+public class DualThreadIndexer extends FileIndexer
 {
 	private Exchanger<DataBuffer> exchanger = new Exchanger<DataBuffer>();
 	private class DataBuffer

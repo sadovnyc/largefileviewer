@@ -12,5 +12,5 @@ public interface IIndexerListener
 	 * 
 	 * @param indexer the indexer
 	 */
-	public void newIndexChunk(LargeFileIndexer indexer);
+	public void newIndexChunk(FileIndexer indexer);
 }
