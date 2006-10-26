@@ -2,7 +2,9 @@ package speedyviewer.views;
 
 import java.io.File;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.part.ViewPart;
@@ -10,6 +12,7 @@ import org.eclipse.ui.part.ViewPart;
 import speedyviewer.core.FileIndexer;
 import speedyviewer.core.IIndexerListener;
 import speedyviewer.core.IndexerThread;
+import speedyviewer.core.LargeFileContent;
 
 
 /**
@@ -18,6 +21,28 @@ import speedyviewer.core.IndexerThread;
 public class SpeedyView extends ViewPart
 {
 	private StyledText viewer;
+
+	private IndexerThread indexer;
+
+	private Action loadFileAction = new Action()
+	{
+		@Override
+		public void run()
+		{
+			FileDialog dialog = new FileDialog(SpeedyView.this.getSite().getShell());
+			dialog.setText("select a file");
+			String fileName = dialog.open();
+			if(fileName != null)
+			{
+				if(indexer != null)
+					indexer.setListener(null);
+				indexer = new IndexerThread(64*1024,new File(fileName));
+				indexer.setListener(listener);
+				indexer.start();
+			}
+		}
+		
+	};
 
 	/**
 	 * Update the view
@@ -64,11 +89,16 @@ public class SpeedyView extends ViewPart
 	 */
 	public void createPartControl(Composite parent)
 	{
-		viewer = new StyledText(parent, SWT.NONE);
+		viewer = new StyledText(parent, SWT.V_SCROLL);
 		//create and start indexer thread here
-		IndexerThread indexer = new IndexerThread(64*1024,new File("/home/fab/ciccione.txt"));
-		indexer.setListener(listener);
-		indexer.start();
+//		IndexerThread indexer = new IndexerThread(64*1024,new File("/home/fab/ciccione.txt"));
+//		indexer.setListener(listener);
+//		indexer.start();
+		
+		viewer.setContent(new LargeFileContent());
+		
+		loadFileAction.setText("Open File");
+		getViewSite().getActionBars().getMenuManager().add(loadFileAction);
 	}
 
 	/**

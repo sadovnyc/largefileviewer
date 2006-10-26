@@ -25,7 +25,7 @@ public class LargeFileContent implements StyledTextContent {
 
 	public String getLine(int lineIndex) {
 		// TODO Auto-generated method stub
-		return null;
+		return String.format("ciccio%6d", lineIndex);
 	}
 
 	public int getLineAtOffset(int offset) {
@@ -35,12 +35,11 @@ public class LargeFileContent implements StyledTextContent {
 
 	public int getLineCount() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 1000000;
 	}
 
 	public String getLineDelimiter() {
-		// TODO Auto-generated method stub
-		return null;
+		return "\n";
 	}
 
 	public int getOffsetAtLine(int lineIndex) {
