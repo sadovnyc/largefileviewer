@@ -24,6 +24,7 @@ public class FileIndexer
 		int[] indexChunk = new int[chunkSize];
 		int offset = 0;
 		int line = 0;
+		int bytesInLine = 0;
 		int len;
 		long start = 0;
 		long computation = 0;
@@ -39,11 +40,12 @@ public class FileIndexer
 			start = System.currentTimeMillis();
 			for(int i=0 ; i < len ; i++)
 			{
+				bytesInLine++;
 				//check for newline: ascii code 10
-				if(buffer[i] == 10)
+				if(buffer[i] == 10 /*|| bytesInLine > 256*/) //doesn't work when using ReadLine() -> needs buffer.
 				{
 					indexChunk[line++] = offset + i + 1;
-					
+					bytesInLine = 0;
 					//chunk filled?
 					if(line == indexChunk.length)
 					{

@@ -21,9 +21,9 @@ import speedyviewer.core.LargeFileContent;
 public class SpeedyView extends ViewPart
 {
 	private StyledText viewer;
-
 	private IndexerThread indexer;
-
+	private String fileName;
+	
 	private Action loadFileAction = new Action()
 	{
 		@Override
@@ -31,14 +31,17 @@ public class SpeedyView extends ViewPart
 		{
 			FileDialog dialog = new FileDialog(SpeedyView.this.getSite().getShell());
 			dialog.setText("select a file");
-			String fileName = dialog.open();
+			fileName = dialog.open();
 			if(fileName != null)
 			{
 				if(indexer != null)
 					indexer.setListener(null);
-				indexer = new IndexerThread(64*1024,new File(fileName));
+				File file = new File(fileName);
+				indexer = new IndexerThread(64*1024, file);
 				indexer.setListener(listener);
 				indexer.start();
+				viewer.setContent(new LargeFileContent(file, indexer));
+				
 			}
 		}
 		
@@ -95,7 +98,7 @@ public class SpeedyView extends ViewPart
 //		indexer.setListener(listener);
 //		indexer.start();
 		
-		viewer.setContent(new LargeFileContent());
+		//viewer.setContent(new LargeFileContent(fileName, indexer));
 		
 		loadFileAction.setText("Open File");
 		getViewSite().getActionBars().getMenuManager().add(loadFileAction);

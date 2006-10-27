@@ -50,8 +50,8 @@
    <object id="ImplicitParameterNode2" class="com.horstmann.violet.ImplicitParameterNode"> 
     <void property="name"> 
      <void property="text"> 
-      <string>Visualization
-buffer</string> 
+      <string>LargeFileContent
+</string> 
      </void> 
     </void> 
    </object> 
@@ -107,7 +107,7 @@ buffer</string>
    <object idref="CallNode1"/> 
    <object class="java.awt.geom.Point2D$Double"> 
     <void method="setLocation"> 
-     <double>492.0</double> 
+     <double>512.0</double> 
      <double>168.0</double> 
     </void> 
    </object> 
@@ -116,7 +116,7 @@ buffer</string>
    <object idref="CallNode2"/> 
    <object class="java.awt.geom.Point2D$Double"> 
     <void method="setLocation"> 
-     <double>500.0</double> 
+     <double>520.0</double> 
      <double>197.0</double> 
     </void> 
    </object> 
@@ -134,7 +134,7 @@ buffer</string>
    <object idref="CallNode4"/> 
    <object class="java.awt.geom.Point2D$Double"> 
     <void method="setLocation"> 
-     <double>492.0</double> 
+     <double>512.0</double> 
      <double>295.0</double> 
     </void> 
    </object> 
