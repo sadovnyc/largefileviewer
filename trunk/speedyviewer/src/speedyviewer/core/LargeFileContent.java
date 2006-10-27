@@ -1,7 +1,10 @@
 package speedyviewer.core;
 
+import java.io.RandomAccessFile;
+
 import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.custom.TextChangeListener;
+import java.io.File;
 
 /**
  * This class is a content model for a large file.
@@ -13,6 +16,22 @@ import org.eclipse.swt.custom.TextChangeListener;
  */
 public class LargeFileContent implements StyledTextContent {
 
+	static int MAX_LINE_LEN = 256;
+	private RandomAccessFile rafile;
+	private IndexerThread indexer;
+	private 	int[] lineDelimiter = new int[2];
+	
+	public LargeFileContent(File file, IndexerThread indexerTh){
+		try{
+			rafile = new RandomAccessFile(file, "r");
+			indexer = indexerTh;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	//TODO un distruttore per chiamare fileInputStream.finalize()
+	
 	public void addTextChangeListener(TextChangeListener listener) {
 		// TODO Auto-generated method stub
 
@@ -24,8 +43,21 @@ public class LargeFileContent implements StyledTextContent {
 	}
 
 	public String getLine(int lineIndex) {
-		// TODO Auto-generated method stub
-		return String.format("ciccio%6d", lineIndex);
+		if(indexer == null)
+			return "me manca l'indexer, speta";
+		if(lineIndex >= indexer.getLineCount())
+			return "gnancora pronto";
+		String line = "";
+		try{
+			indexer.getLineDelimiters(lineIndex, lineDelimiter);
+			rafile.seek(lineDelimiter[0]);
+			line = rafile.readLine();	
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return  line; //new String(lineBuffer) + String.format("(%3d byte)", count);
 	}
 
 	public int getLineAtOffset(int offset) {
@@ -75,6 +107,17 @@ public class LargeFileContent implements StyledTextContent {
 	 * @see org.eclipse.swt.custom.StyledTextContent#setText(java.lang.String)
 	 */
 	public void setText(String text) {
+	}
+	
+	public void setFileAndIndexer(File file, IndexerThread indexerTh)
+	{
+		try{
+			rafile = new RandomAccessFile(file, "r");
+			indexer = indexerTh;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 
 }
