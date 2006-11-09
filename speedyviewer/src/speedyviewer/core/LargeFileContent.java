@@ -3,8 +3,15 @@ package speedyviewer.core;
 import java.io.RandomAccessFile;
 
 import org.eclipse.swt.custom.StyledTextContent;
+//import org.eclipse.swt.custom.StyledTextEvent;
+//import org.eclipse.swt.custom.StyledTextListener;
 import org.eclipse.swt.custom.TextChangeListener;
+import org.eclipse.swt.custom.TextChangedEvent;
+import org.eclipse.swt.custom.TextChangingEvent;
+import org.eclipse.swt.widgets.Display;
+
 import java.io.File;
+import java.util.Vector;
 
 /**
  * This class is a content model for a large file.
@@ -20,11 +27,46 @@ public class LargeFileContent implements StyledTextContent {
 	private RandomAccessFile rafile;
 	private IndexerThread indexer;
 	private 	int[] lineDelimiter = new int[2];
+	Vector textListeners = new Vector(); // stores text listeners for event sending
+
+	private Runnable sendTextChangingEvent = new Runnable()
+	{
+		public void run()
+		{
+			TextChangingEvent event = new TextChangingEvent(LargeFileContent.this);
+			event.start = getCharCount();
+			event.replaceCharCount = 0;
+			event.replaceLineCount = 0;
+			event.newText = null;
+			event.newCharCount = 0;
+			for (int i = 0; i < textListeners.size(); i++)
+				((TextChangeListener)textListeners.elementAt(i)).textChanging(event);
+		}
+	};
+
+	private Runnable sendTextChangedEvent = new Runnable()
+	{
+		public void run()
+		{
+			TextChangedEvent event = new TextChangedEvent(LargeFileContent.this);
+			for (int i = 0; i < textListeners.size(); i++)
+				((TextChangeListener)textListeners.elementAt(i)).textChanged(event);
+		}
+	};
+
+	private IIndexerListener listener = new IIndexerListener() {
+		public void newIndexChunk(FileIndexer indexer)
+		{
+			Display.getDefault().syncExec(sendTextChangingEvent);
+			Display.getDefault().syncExec(sendTextChangedEvent);
+		}
+	};
 	
 	public LargeFileContent(File file, IndexerThread indexerTh){
 		try{
 			rafile = new RandomAccessFile(file, "r");
 			indexer = indexerTh;
+			indexerTh.setListener(listener);
 		}
 		catch (Exception e) {
 			// TODO: handle exception
@@ -32,14 +74,16 @@ public class LargeFileContent implements StyledTextContent {
 	}
 	//TODO un distruttore per chiamare fileInputStream.finalize()
 	
+	@SuppressWarnings("unchecked")
 	public void addTextChangeListener(TextChangeListener listener) {
-		// TODO Auto-generated method stub
-
+		textListeners.addElement(listener);
 	}
 
 	public int getCharCount() {
-		// TODO Auto-generated method stub
-		return 0;
+//		indexer.getLineDelimiters(indexer.getLineCount()-2, lineDelimiter);
+//		return lineDelimiter[1];
+		return indexer.getCharacterCount();
+//		return 100000000;
 	}
 
 	public String getLine(int lineIndex) {
@@ -51,7 +95,8 @@ public class LargeFileContent implements StyledTextContent {
 		try{
 			indexer.getLineDelimiters(lineIndex, lineDelimiter);
 			rafile.seek(lineDelimiter[0]);
-			line = rafile.readLine();	
+			line = rafile.readLine();
+			
 		}
 		catch (Exception e) {
 			// TODO: handle exception
@@ -61,13 +106,12 @@ public class LargeFileContent implements StyledTextContent {
 	}
 
 	public int getLineAtOffset(int offset) {
-		// TODO Auto-generated method stub
-		return 0;
+		return indexer.getLineForOffset(offset);
 	}
 
 	public int getLineCount() {
-		// TODO Auto-generated method stub
-		return 1000000;
+//		return 1000000;
+		return indexer.getLineCount();
 	}
 
 	public String getLineDelimiter() {
@@ -75,8 +119,8 @@ public class LargeFileContent implements StyledTextContent {
 	}
 
 	public int getOffsetAtLine(int lineIndex) {
-		// TODO Auto-generated method stub
-		return 0;
+		indexer.getLineDelimiters(lineIndex, lineDelimiter);
+		return lineDelimiter[0];
 	}
 
 	public String getTextRange(int start, int length) {
@@ -85,8 +129,7 @@ public class LargeFileContent implements StyledTextContent {
 	}
 
 	public void removeTextChangeListener(TextChangeListener listener) {
-		// TODO Auto-generated method stub
-
+		textListeners.remove(listener);
 	}
 
 	/**
