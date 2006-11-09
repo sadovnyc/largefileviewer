@@ -76,4 +76,14 @@ public class IndexerThread extends Thread
 	{
 		indexer.setListener(listener);
 	}
+	
+	public synchronized int getLineForOffset(int offset)
+	{
+		return indexer.getLineForOffset(offset);
+	}
+	
+	public synchronized int getCharacterCount()
+	{
+		return indexer.getCharCount();
+	}
 }
