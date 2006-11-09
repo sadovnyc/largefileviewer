@@ -20,6 +20,8 @@ import speedyviewer.core.LargeFileContent;
  */
 public class SpeedyView extends ViewPart
 {
+	public static final int MAX_LINE_LEN = 256;
+
 	private StyledText viewer;
 	private IndexerThread indexer;
 	private String fileName;
