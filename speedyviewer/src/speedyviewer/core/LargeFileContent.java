@@ -29,36 +29,20 @@ public class LargeFileContent implements StyledTextContent {
 	private 	int[] lineDelimiter = new int[2];
 	Vector textListeners = new Vector(); // stores text listeners for event sending
 
-	private Runnable sendTextChangingEvent = new Runnable()
-	{
-		public void run()
-		{
-			TextChangingEvent event = new TextChangingEvent(LargeFileContent.this);
-			event.start = getCharCount();
-			event.replaceCharCount = 0;
-			event.replaceLineCount = 0;
-			event.newText = null;
-			event.newCharCount = 0;
-			for (int i = 0; i < textListeners.size(); i++)
-				((TextChangeListener)textListeners.elementAt(i)).textChanging(event);
-		}
-	};
-
-	private Runnable sendTextChangedEvent = new Runnable()
+	private Runnable sendTextSetEvent = new Runnable()
 	{
 		public void run()
 		{
 			TextChangedEvent event = new TextChangedEvent(LargeFileContent.this);
 			for (int i = 0; i < textListeners.size(); i++)
-				((TextChangeListener)textListeners.elementAt(i)).textChanged(event);
+				((TextChangeListener)textListeners.elementAt(i)).textSet(event);
 		}
 	};
 
 	private IIndexerListener listener = new IIndexerListener() {
 		public void newIndexChunk(FileIndexer indexer)
 		{
-			Display.getDefault().syncExec(sendTextChangingEvent);
-			Display.getDefault().syncExec(sendTextChangedEvent);
+			Display.getDefault().syncExec(sendTextSetEvent);
 		}
 	};
 	

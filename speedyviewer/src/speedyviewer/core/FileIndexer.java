@@ -4,15 +4,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Vector;
 
+/**
+ * This class indexes the lines in a text file.
+ * It stores the file offset of the first character
+ * of each line, starting from line 0 -> offset 0.
+ * 
+ * The internal storage is a List of arrays (called chunks)
+ * all of the same size. This allows the index to grow without
+ * reallocating, thus performing better for huge files (many
+ * millions of lines). 
+ */
 public class FileIndexer
 {
 	protected int chunkSize;
 	private int count = 0;
 	private int charCount = 0;
 	private ArrayList<int[]> indexCache = new ArrayList<int[]>();
-	private IIndexerListener listener;
+	Vector<IIndexerListener> listeners = new Vector<IIndexerListener>();
 
+	/**
+	 * Create an indexer with the specified chunk size.
+	 * 
+	 * @param chunkSize
+	 */
 	public FileIndexer(int chunkSize)
 	{
 		super();
@@ -31,6 +47,8 @@ public class FileIndexer
 		long computation = 0;
 		long reading = 0;
 	
+		indexCache.clear();
+
 		FileInputStream inputStream = new FileInputStream(file);
 	
 		start = System.currentTimeMillis();
@@ -73,6 +91,16 @@ public class FileIndexer
 		inputStream.close();
 	}
 
+	public void clear()
+	{
+		synchronized(indexCache)
+		{
+			indexCache.clear();
+			count = 0;
+			charCount = 0;
+		}
+	}
+
 	protected void sendIndexChunk(int[] indexChunk, int len)
 	{
 		synchronized(indexCache)
@@ -82,7 +110,7 @@ public class FileIndexer
 			charCount = indexChunk[len-1];
 		}
 
-		if(listener != null)
+		for (IIndexerListener listener : listeners)
 			listener.newIndexChunk(this);
 	}
 
@@ -185,7 +213,8 @@ public class FileIndexer
 
 	public void setListener(IIndexerListener listener)
 	{
-		this.listener = listener;
+		if(listener != null)
+			listeners.add(listener);
 	}
 
 }
