@@ -76,6 +76,9 @@ public class SpeedyView extends ViewPart
 			//from the indexer thread and can not call UI methods)
 			SpeedyView.this.getViewSite().getShell().getDisplay().asyncExec(new ViewUpdate(indexer.getLineCount()));
 		}
+
+		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len) {}
+		public void indexingComplete(FileIndexer indexer) {}
 	};
 
 	/**

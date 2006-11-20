@@ -13,4 +13,8 @@ public interface IIndexerListener
 	 * @param indexer the indexer
 	 */
 	public void newIndexChunk(FileIndexer indexer);
+	
+	public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len);
+	
+	public void indexingComplete(FileIndexer indexer);
 }
