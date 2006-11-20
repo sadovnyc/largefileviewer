@@ -20,10 +20,10 @@ import speedyviewer.core.LargeFileContent;
  */
 public class SpeedyView extends ViewPart
 {
-	public static final int MAX_LINE_LEN = 256;
+	private static final int CHUNK_SIZE = 64*1024;
 
 	private StyledText viewer;
-	private IndexerThread indexer;
+	private IndexerThread indexerTh;
 	private String fileName;
 	
 	private Action loadFileAction = new Action()
@@ -36,14 +36,13 @@ public class SpeedyView extends ViewPart
 			fileName = dialog.open();
 			if(fileName != null)
 			{
-				if(indexer != null)
-					indexer.setListener(null);
+				if(indexerTh != null)
+					indexerTh.setListener(null);
 				File file = new File(fileName);
-				indexer = new IndexerThread(64*1024, file);
-				indexer.setListener(listener);
-				indexer.start();
-				viewer.setContent(new LargeFileContent(file, indexer));
-				
+				indexerTh = new IndexerThread(new FileIndexer(CHUNK_SIZE), file);
+				indexerTh.setListener(listener);
+				indexerTh.start();
+				viewer.setContent(new LargeFileContent(file, indexerTh.getIndexer()));
 			}
 		}
 		
@@ -95,13 +94,8 @@ public class SpeedyView extends ViewPart
 	public void createPartControl(Composite parent)
 	{
 		viewer = new StyledText(parent, SWT.V_SCROLL);
-		//create and start indexer thread here
-//		IndexerThread indexer = new IndexerThread(64*1024,new File("/home/fab/ciccione.txt"));
-//		indexer.setListener(listener);
-//		indexer.start();
-		
-		//viewer.setContent(new LargeFileContent(fileName, indexer));
-		
+
+		//add load item in drop down menu
 		loadFileAction.setText("Open File");
 		getViewSite().getActionBars().getMenuManager().add(loadFileAction);
 	}

@@ -14,20 +14,27 @@ import java.io.File;
 import java.util.Vector;
 
 /**
- * This class is a content model for a large file.
- * It does not read the whole file into memory, rather it
- * caches a portion of it around the current position.
- * Note that the model is read only.
+ * This class is a content model for a large file. It does not read the whole
+ * file into memory, rather it caches a portion of it around the current
+ * position. Note that the model is read only.
  * 
  * Cache updating is done through a different thread
  */
-public class LargeFileContent implements StyledTextContent {
+public class LargeFileContent implements StyledTextContent
+{
+	//constants
+	private static final int MAX_LINE_LEN = 256;
+	private static final String LINE_DELIMITER = "\n";
 
-	static int MAX_LINE_LEN = 256;
+	//file used to read lines when needed
 	private RandomAccessFile rafile;
-	private IndexerThread indexer;
-	private 	int[] lineDelimiter = new int[2];
-	Vector textListeners = new Vector(); // stores text listeners for event sending
+
+	private FileIndexer indexer;
+
+	private int[] lineDelimiter = new int[2];
+
+	Vector textListeners = new Vector(); // stores text listeners for event
+											// sending
 
 	private Runnable sendTextSetEvent = new Runnable()
 	{
@@ -35,84 +42,94 @@ public class LargeFileContent implements StyledTextContent {
 		{
 			TextChangedEvent event = new TextChangedEvent(LargeFileContent.this);
 			for (int i = 0; i < textListeners.size(); i++)
-				((TextChangeListener)textListeners.elementAt(i)).textSet(event);
+				((TextChangeListener) textListeners.elementAt(i))
+						.textSet(event);
 		}
 	};
 
-	private IIndexerListener listener = new IIndexerListener() {
+	private IIndexerListener listener = new IIndexerListener()
+	{
 		public void newIndexChunk(FileIndexer indexer)
 		{
 			Display.getDefault().syncExec(sendTextSetEvent);
 		}
 	};
-	
-	public LargeFileContent(File file, IndexerThread indexerTh){
-		try{
+
+	public LargeFileContent(File file, FileIndexer indexer)
+	{
+		try
+		{
 			rafile = new RandomAccessFile(file, "r");
-			indexer = indexerTh;
-			indexerTh.setListener(listener);
-		}
-		catch (Exception e) {
+			this.indexer = indexer;
+			indexer.addListener(listener);
+		} catch (Exception e)
+		{
 			// TODO: handle exception
 		}
 	}
-	//TODO un distruttore per chiamare fileInputStream.finalize()
-	
+
+	// TODO un distruttore per chiamare fileInputStream.finalize()
+
 	@SuppressWarnings("unchecked")
-	public void addTextChangeListener(TextChangeListener listener) {
+	public void addTextChangeListener(TextChangeListener listener)
+	{
 		textListeners.addElement(listener);
 	}
 
-	public int getCharCount() {
-//		indexer.getLineDelimiters(indexer.getLineCount()-2, lineDelimiter);
-//		return lineDelimiter[1];
-		return indexer.getCharacterCount();
-//		return 100000000;
+	public int getCharCount()
+	{
+		return indexer.getCharCount();
 	}
 
-	public String getLine(int lineIndex) {
-		if(indexer == null)
+	public String getLine(int lineIndex)
+	{
+		if (indexer == null)
 			return "me manca l'indexer, speta";
-		if(lineIndex >= indexer.getLineCount())
+		if (lineIndex >= indexer.getLineCount())
 			return "gnancora pronto";
 		String line = "";
-		try{
-			indexer.getLineDelimiters(lineIndex, lineDelimiter);
-			rafile.seek(lineDelimiter[0]);
+		try
+		{
+			rafile.seek(indexer.getOffsetForLine(lineIndex));
 			line = rafile.readLine();
-			
-		}
-		catch (Exception e) {
+
+		} catch (Exception e)
+		{
 			// TODO: handle exception
 		}
-		
-		return  line; //new String(lineBuffer) + String.format("(%3d byte)", count);
+
+		return line; // new String(lineBuffer) + String.format("(%3d byte)",
+						// count);
 	}
 
-	public int getLineAtOffset(int offset) {
+	public int getLineAtOffset(int offset)
+	{
 		return indexer.getLineForOffset(offset);
 	}
 
-	public int getLineCount() {
-//		return 1000000;
+	public int getLineCount()
+	{
 		return indexer.getLineCount();
 	}
 
-	public String getLineDelimiter() {
-		return "\n";
+	public String getLineDelimiter()
+	{
+		return LINE_DELIMITER;
 	}
 
-	public int getOffsetAtLine(int lineIndex) {
-		indexer.getLineDelimiters(lineIndex, lineDelimiter);
-		return lineDelimiter[0];
+	public int getOffsetAtLine(int lineIndex)
+	{
+		return indexer.getOffsetForLine(lineIndex);
 	}
 
-	public String getTextRange(int start, int length) {
+	public String getTextRange(int start, int length)
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void removeTextChangeListener(TextChangeListener listener) {
+	public void removeTextChangeListener(TextChangeListener listener)
+	{
 		textListeners.remove(listener);
 	}
 
@@ -121,9 +138,11 @@ public class LargeFileContent implements StyledTextContent {
 	 * 
 	 * TODO should it throw an exception?
 	 * 
-	 * @see org.eclipse.swt.custom.StyledTextContent#replaceTextRange(int, int, java.lang.String)
+	 * @see org.eclipse.swt.custom.StyledTextContent#replaceTextRange(int, int,
+	 *      java.lang.String)
 	 */
-	public void replaceTextRange(int start, int replaceLength, String text) {
+	public void replaceTextRange(int start, int replaceLength, String text)
+	{
 	}
 
 	/**
@@ -133,16 +152,18 @@ public class LargeFileContent implements StyledTextContent {
 	 * 
 	 * @see org.eclipse.swt.custom.StyledTextContent#setText(java.lang.String)
 	 */
-	public void setText(String text) {
-	}
-	
-	public void setFileAndIndexer(File file, IndexerThread indexerTh)
+	public void setText(String text)
 	{
-		try{
+	}
+
+	public void setFileAndIndexer(File file, FileIndexer indexer)
+	{
+		try
+		{
 			rafile = new RandomAccessFile(file, "r");
-			indexer = indexerTh;
-		}
-		catch (Exception e) {
+			this.indexer = indexer;
+		} catch (Exception e)
+		{
 			// TODO: handle exception
 		}
 	}

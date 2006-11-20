@@ -29,7 +29,7 @@ public class DualThreadIndexer extends FileIndexer
 
 	public void index(File file) throws IOException
 	{
-		int[] indexChunk = new int[chunkSize];
+		int[] indexChunk = new int[getChunkSize()];
 		int offset = 0;
 		int line = 0;
 		int len;
@@ -63,7 +63,7 @@ public class DualThreadIndexer extends FileIndexer
 						if(line == indexChunk.length)
 						{
 							sendIndexChunk(indexChunk, line);
-							indexChunk = new int[chunkSize];
+							indexChunk = new int[getChunkSize()];
 							line = 0;
 						}
 					}
