@@ -34,62 +34,87 @@ public class FileIndexer
 		index = new ChunkIntArray(chunkSize);
 	}
 
+	/**
+	 * Index the given file.
+	 * This operation is synchronous.
+	 * 
+	 * @param file file to index.
+	 * @throws IOException in case open/read/close operations fail.
+	 */
 	public void index(File file) throws IOException
 	{
+		int[] chunk = new int[index.getChunksize()];
+
+		//read buffer
 		byte[] buffer = new byte[1024*256];
-		int[] indexChunk = new int[index.getChunksize()];
-		int offset = 0;
-		int line = 0;
-		int bytesInLine = 0;
+		int bufferOffset = 0;
 		int len;
+
+		//overall line count
+		int line = 0;
+		
+		int bytesInLine = 0;
+		
+		//for statistics
 		long start = 0;
 		long computation = 0;
 		long reading = 0;
 	
-		index.clear();
-
+		//initialise
+		clear();
 		FileInputStream inputStream = new FileInputStream(file);
 	
 		start = System.currentTimeMillis();
 		
 		//add first line (offset 0)
-		indexChunk[line++] = 0;
+		chunk[line++] = 0;
 	
 		while( (len = inputStream.read(buffer)) > 0)
 		{
 			reading += System.currentTimeMillis() - start;
 			start = System.currentTimeMillis();
+			//now scan the read buffer
 			for(int i=0 ; i < len ; i++)
 			{
 				bytesInLine++;
 				//check for newline: ascii code 10
 				if(buffer[i] == 10 /*|| bytesInLine > 256*/) //doesn't work when using ReadLine() -> needs buffer.
 				{
-					indexChunk[line++] = offset + i + 1;
-					bytesInLine = 0;
-					//chunk filled?
-					if(line == indexChunk.length)
+					//if the chunk is already full 'send' it and create a new one
+					if(line == chunk.length)
 					{
-						sendIndexChunk(indexChunk, line);
-						indexChunk = new int[index.getChunksize()];
+						sendIndexChunk(chunk, line, bufferOffset + i + 1 - chunk[0]);
+						chunk = new int[index.getChunksize()];
 						line = 0;
 					}
+					//next line starts from the character after new line 
+					chunk[line++] = bufferOffset + i + 1;
+					bytesInLine = 0;
 				}
 			}
 			//going to read next buffer, update offset
-			offset += len;
+			bufferOffset += len;
 			computation += System.currentTimeMillis() - start;
 			start = System.currentTimeMillis();
 		}
-		
+
 		//last chunk (if not completely filled)
 		if(line > 0)
-			sendIndexChunk(indexChunk, line);
+			sendIndexChunk(chunk, line, bufferOffset - chunk[0]);
 	
+		//create a temporary array for notifications
+		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
+		for (IIndexerListener listener : listenerArray)
+			listener.indexingComplete(this);
+
 		System.out.println("computation time (ms):" + computation + " reading time (ms):" + reading);
 		inputStream.close();
 	}
 
+	/**
+	 * Clears the index.
+	 * 
+	 */
 	public void clear()
 	{
 		synchronized(index)
@@ -99,15 +124,17 @@ public class FileIndexer
 		}
 	}
 
-	protected void sendIndexChunk(int[] indexChunk, int len)
+	protected void sendIndexChunk(int[] indexChunk, int len, int chunkCharCount)
 	{
 		synchronized(index)
 		{
 			index.add(indexChunk, len);
-			charCount = indexChunk[len-1];
+			charCount += chunkCharCount;
 		}
 
-		for (IIndexerListener listener : listeners)
+		//create a temporary array for notifications
+		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
+		for (IIndexerListener listener : listenerArray)
 			listener.newIndexChunk(this);
 	}
 	
@@ -128,7 +155,12 @@ public class FileIndexer
 	{
 		synchronized(index)
 		{
-			return index.get(line);
+			if(line < index.size())
+				return index.get(line);
+			else if(line == index.size())
+				return charCount;
+			else
+				throw new ArrayIndexOutOfBoundsException();
 		}
 	}
 
@@ -142,8 +174,18 @@ public class FileIndexer
 
 		synchronized (index)
 		{
+			//allow offset at end of file
+			if( charCount > 0 && offset >= charCount)
+				return index.size() - 1; //size is always > 0
+
 			min = 0;
-			max = index.size() - 1;
+			max = index.size() - 1; //size is always > 0
+			
+			//treat it as special case, otherwise
+			//line+1 below would be > max
+			if(max == 0)
+				return 0;
+
 			do
 			{
 				line = min + (max - min)/2;

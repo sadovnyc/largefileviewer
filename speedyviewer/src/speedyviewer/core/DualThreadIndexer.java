@@ -62,7 +62,7 @@ public class DualThreadIndexer extends FileIndexer
 						//chunk filled?
 						if(line == indexChunk.length)
 						{
-							sendIndexChunk(indexChunk, line);
+							sendIndexChunk(indexChunk, line, indexChunk[line-1]);
 							indexChunk = new int[getChunkSize()];
 							line = 0;
 						}
@@ -81,7 +81,7 @@ public class DualThreadIndexer extends FileIndexer
 		
 		//last chunk (if not completely filled)
 		if(line > 0)
-			sendIndexChunk(indexChunk, line);
+			sendIndexChunk(indexChunk, line, indexChunk[line-1]);
 
 		System.out.println("computation time (ms):" + computation + " reading time (ms):" + reading);
 	}
