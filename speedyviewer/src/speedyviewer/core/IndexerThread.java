@@ -24,11 +24,11 @@ public class IndexerThread extends Thread
 	 * @param chunkSize the size of index chunks.
 	 * @param file the file to index.
 	 */
-	public IndexerThread(int chunkSize, File file)
+	public IndexerThread(FileIndexer indexer, File file)
 	{
 		super("indexing:" + file.getPath());
 		this.file = file;
-		this.indexer = new FileIndexer(chunkSize);
+		this.indexer = indexer;
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class IndexerThread extends Thread
 	public synchronized void getLineDelimiters(int line, int[] values)
 	{
 		values[0] = indexer.getOffsetForLine(line);
-		values[1] = indexer.getOffsetForLine(line+1);
+		values[1] = indexer.getOffsetForLine(line+1) - 1;
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class IndexerThread extends Thread
 	 */
 	public void setListener(IIndexerListener listener)
 	{
-		indexer.setListener(listener);
+		indexer.addListener(listener);
 	}
 	
 	public synchronized int getLineForOffset(int offset)
@@ -85,5 +85,10 @@ public class IndexerThread extends Thread
 	public synchronized int getCharacterCount()
 	{
 		return indexer.getCharCount();
+	}
+	
+	public synchronized FileIndexer getIndexer()
+	{
+		return indexer;
 	}
 }

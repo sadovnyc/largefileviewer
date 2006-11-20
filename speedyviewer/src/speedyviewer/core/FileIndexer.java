@@ -3,8 +3,9 @@ package speedyviewer.core;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Vector;
+
+import speedyviewer.util.ChunkIntArray;
 
 /**
  * This class indexes the lines in a text file.
@@ -18,11 +19,9 @@ import java.util.Vector;
  */
 public class FileIndexer
 {
-	protected int chunkSize;
-	private int count = 0;
 	private int charCount = 0;
-	private ArrayList<int[]> indexCache = new ArrayList<int[]>();
-	Vector<IIndexerListener> listeners = new Vector<IIndexerListener>();
+	private Vector<IIndexerListener> listeners = new Vector<IIndexerListener>();
+	private ChunkIntArray index;
 
 	/**
 	 * Create an indexer with the specified chunk size.
@@ -32,13 +31,13 @@ public class FileIndexer
 	public FileIndexer(int chunkSize)
 	{
 		super();
-		this.chunkSize = chunkSize;
+		index = new ChunkIntArray(chunkSize);
 	}
 
 	public void index(File file) throws IOException
 	{
 		byte[] buffer = new byte[1024*256];
-		int[] indexChunk = new int[chunkSize];
+		int[] indexChunk = new int[index.getChunksize()];
 		int offset = 0;
 		int line = 0;
 		int bytesInLine = 0;
@@ -47,7 +46,7 @@ public class FileIndexer
 		long computation = 0;
 		long reading = 0;
 	
-		indexCache.clear();
+		index.clear();
 
 		FileInputStream inputStream = new FileInputStream(file);
 	
@@ -72,7 +71,7 @@ public class FileIndexer
 					if(line == indexChunk.length)
 					{
 						sendIndexChunk(indexChunk, line);
-						indexChunk = new int[chunkSize];
+						indexChunk = new int[index.getChunksize()];
 						line = 0;
 					}
 				}
@@ -93,125 +92,87 @@ public class FileIndexer
 
 	public void clear()
 	{
-		synchronized(indexCache)
+		synchronized(index)
 		{
-			indexCache.clear();
-			count = 0;
+			index.clear();
 			charCount = 0;
 		}
 	}
 
 	protected void sendIndexChunk(int[] indexChunk, int len)
 	{
-		synchronized(indexCache)
+		synchronized(index)
 		{
-			indexCache.add(indexChunk);
-			count += len;
+			index.add(indexChunk, len);
 			charCount = indexChunk[len-1];
 		}
 
 		for (IIndexerListener listener : listeners)
 			listener.newIndexChunk(this);
 	}
+	
+	protected int getChunkSize()
+	{
+		return index.getChunksize();
+	}
 
 	public int getLineCount()
 	{
-		synchronized(indexCache)
+		synchronized(index)
 		{
-			return count;
+			return index.size();
 		}
 	}
 
 	public int getOffsetForLine(int line)
 	{
-		int chunk;
-		int offset;
-
-		chunk = line / chunkSize;
-		offset = line % chunkSize;
-
-		synchronized(indexCache)
+		synchronized(index)
 		{
-			if(line >= count)
-				throw new IndexOutOfBoundsException();
-		
-			return indexCache.get(chunk)[offset];
+			return index.get(line);
 		}
 	}
 
 	public int getLineForOffset(int offset)
 	{
 		int line;
-		int indexChunk;
-		int[] chunk;
+		int min;
+		int max;
+		int off1;
+		int off2;
 
-		synchronized(indexCache)
+		synchronized (index)
 		{
-			int min = 0;
-			int max = indexCache.size();
-			int chunkLast;
-	
-			indexChunk = min + (max - min)/2;
-
-			//find chunk
-			do
-			{
-				chunk = indexCache.get(indexChunk);
-				chunkLast = chunk.length;
-				if(indexChunk*chunkSize + chunkSize > count)
-					chunkLast = count - indexChunk*chunkSize;
-				
-				if(offset < chunk[0])
-					max = indexChunk - 1;
-				else if(offset > chunk[chunkLast - 1])
-					min = indexChunk;
-				else
-					break;
-
-				indexChunk = min + (max - min)/2;
-			}
-			while(min < max );
-	
-			chunk = indexCache.get(indexChunk);
-
-			//find index in chunk
-			line = indexChunk * chunkSize;
-
 			min = 0;
-
-			if(line + chunkSize <= count)
-				max = chunkSize;
-			else
-				max = count - line;
-
-			int index = min + (max - min)/2;
+			max = index.size() - 1;
 			do
 			{
-				if(offset >= chunk[index] && offset < chunk[index+1])
-					break;
-				else if(offset < chunk[index])
-					max = index - 1;
+				line = min + (max - min)/2;
+				off1 = index.get(line);
+				off2 = index.get(line+1);
+				if(offset >= off1 && offset < off2)
+					max = min = line; // found
+				else if(offset >= off2)
+					min = line + 1;
 				else
-					min = index + 1;
-				index = min + (max - min)/2;
+					max = line - 1;
 			}
-			while(min < max);
-
-			line += index;
-
-			if(line >= count)
-				throw new IndexOutOfBoundsException();
-
-			return line;
+			while(max > min);
 		}
+		
+		line = min + (max - min)/2;
+		
+		return line;
 	}
-	
+
 	public int getCharCount()
 	{
-		return charCount;
+		synchronized (index)
+		{
+			return charCount;
+		}
 	}
 
-	public void setListener(IIndexerListener listener)
+	public void addListener(IIndexerListener listener)
 	{
 		if(listener != null)
 			listeners.add(listener);
