@@ -67,6 +67,17 @@ public class LargeFileContent implements StyledTextContent
 
 	TextChangingEventSender sendTextChangingEvent = new TextChangingEventSender();
 	
+	private Runnable sendTextChangedEvent = new Runnable()
+	{
+		public void run()
+		{
+			TextChangedEvent event = new TextChangedEvent(LargeFileContent.this);
+			for (int i = 0; i < textListeners.size(); i++)
+				((TextChangeListener) textListeners.elementAt(i))
+						.textChanged(event);
+		}
+	};
+
 	private IIndexerListener listener = new IIndexerListener()
 	{
 		private int count;
@@ -74,6 +85,7 @@ public class LargeFileContent implements StyledTextContent
 		{
 			if(indexer.getLineCount() - count > 1000000)
 			{
+//				Display.getDefault().syncExec(sendTextChangedEvent);
 				Display.getDefault().syncExec(sendTextSetEvent);
 				count = indexer.getLineCount();
 			}
