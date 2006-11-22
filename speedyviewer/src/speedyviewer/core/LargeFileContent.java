@@ -80,20 +80,20 @@ public class LargeFileContent implements StyledTextContent
 
 	private IIndexerListener listener = new IIndexerListener()
 	{
-		private int count;
+//		private int count;
 		public void newIndexChunk(FileIndexer indexer)
 		{
-			if(indexer.getLineCount() - count > 1000000)
-			{
-//				Display.getDefault().syncExec(sendTextChangedEvent);
-				Display.getDefault().syncExec(sendTextSetEvent);
-				count = indexer.getLineCount();
-			}
+//			if(indexer.getLineCount() - count > 1000000)
+//			{
+				Display.getDefault().syncExec(sendTextChangedEvent);
+//				Display.getDefault().syncExec(sendTextSetEvent);
+//				count = indexer.getLineCount();
+//			}
 		}
 
-		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len)
+		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len, int charCount)
 		{
-			sendTextChangingEvent.addedChars = chunk[len - 1];
+			sendTextChangingEvent.addedChars = charCount;
 			sendTextChangingEvent.addedLines = len;
 			sendTextChangingEvent.charOffset = indexer.getCharCount();
 			Display.getDefault().syncExec(sendTextChangingEvent);
@@ -101,8 +101,8 @@ public class LargeFileContent implements StyledTextContent
 
 		public void indexingComplete(FileIndexer indexer)
 		{
-			Display.getDefault().syncExec(sendTextSetEvent);
-			count = 0;
+//			Display.getDefault().syncExec(sendTextSetEvent);
+//			count = 0;
 		}
 	};
 

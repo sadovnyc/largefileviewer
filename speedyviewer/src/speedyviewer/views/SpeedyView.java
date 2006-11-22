@@ -77,7 +77,7 @@ public class SpeedyView extends ViewPart
 			SpeedyView.this.getViewSite().getShell().getDisplay().asyncExec(new ViewUpdate(indexer.getLineCount()));
 		}
 
-		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len) {}
+		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len, int charCount) {}
 		public void indexingComplete(FileIndexer indexer) {}
 	};
 
