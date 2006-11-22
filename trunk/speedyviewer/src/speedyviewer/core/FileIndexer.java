@@ -126,14 +126,18 @@ public class FileIndexer
 
 	protected void sendIndexChunk(int[] indexChunk, int len, int chunkCharCount)
 	{
+		//create a temporary array for notifications
+		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
+
+		for (IIndexerListener listener : listenerArray)
+			listener.addingIndexChunk(this, indexChunk, len, chunkCharCount);
+		
 		synchronized(index)
 		{
 			index.add(indexChunk, len);
 			charCount += chunkCharCount;
 		}
 
-		//create a temporary array for notifications
-		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
 		for (IIndexerListener listener : listenerArray)
 			listener.newIndexChunk(this);
 	}
@@ -181,9 +185,10 @@ public class FileIndexer
 			min = 0;
 			max = index.size() - 1; //size is always > 0
 			
-			//treat it as special case, otherwise
+			//treat max == 0 as special case, otherwise
 			//line+1 below would be > max
-			if(max == 0)
+			//max < 0 means index.size() == 0
+			if(max <= 0)
 				return 0;
 
 			do

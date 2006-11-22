@@ -14,7 +14,7 @@ public interface IIndexerListener
 	 */
 	public void newIndexChunk(FileIndexer indexer);
 	
-	public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len);
+	public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len, int charCount);
 	
 	public void indexingComplete(FileIndexer indexer);
 }
