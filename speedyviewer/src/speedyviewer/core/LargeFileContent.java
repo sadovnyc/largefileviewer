@@ -18,7 +18,11 @@ import java.util.Vector;
  * file into memory, rather it caches a portion of it around the current
  * position. Note that the model is read only.
  * 
- * Cache updating is done through a different thread
+ * A FileIndexer is used to seek into the file when a line needs to
+ * be read. The indexer is passed as a parameter in the constructor,
+ * the class registers for indexing updates, this makes it
+ * possible to have the indexing in a separate thread.
+ * 
  */
 public class LargeFileContent implements StyledTextContent
 {
@@ -29,21 +33,17 @@ public class LargeFileContent implements StyledTextContent
 	//file used to read lines when needed
 	private RandomAccessFile rafile;
 
+	//the indexer
 	private FileIndexer indexer;
 
-	Vector textListeners = new Vector(); // stores text listeners for event
-											// sending
+	//own copy of lengths
+	private int charCount;
+	private int lineCount;
+	
+	private int refreshSize;
 
-	private Runnable sendTextSetEvent = new Runnable()
-	{
-		public void run()
-		{
-			TextChangedEvent event = new TextChangedEvent(LargeFileContent.this);
-			for (int i = 0; i < textListeners.size(); i++)
-				((TextChangeListener) textListeners.elementAt(i))
-						.textSet(event);
-		}
-	};
+	//stores text listeners for event sending
+	private Vector textListeners = new Vector();
 
 	private class TextChangingEventSender implements Runnable
 	{
@@ -80,15 +80,11 @@ public class LargeFileContent implements StyledTextContent
 
 	private IIndexerListener listener = new IIndexerListener()
 	{
-//		private int count;
 		public void newIndexChunk(FileIndexer indexer)
 		{
-//			if(indexer.getLineCount() - count > 1000000)
-//			{
-				Display.getDefault().syncExec(sendTextChangedEvent);
-//				Display.getDefault().syncExec(sendTextSetEvent);
-//				count = indexer.getLineCount();
-//			}
+			lineCount = indexer.getLineCount();
+			charCount = indexer.getCharCount();
+			Display.getDefault().syncExec(sendTextChangedEvent);
 		}
 
 		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len, int charCount)
@@ -101,17 +97,35 @@ public class LargeFileContent implements StyledTextContent
 
 		public void indexingComplete(FileIndexer indexer)
 		{
+			lineCount = indexer.getLineCount();
+			charCount = indexer.getCharCount();
 //			Display.getDefault().syncExec(sendTextSetEvent);
 //			count = 0;
 		}
 	};
 
+	/**
+	 * Constructor.
+	 * Note that the class will not start indexing, this
+	 * has to be done by the clinet.
+	 * 
+	 * @param file the file to read from.
+	 * @param indexer the indexer to use.
+	 */
 	public LargeFileContent(File file, FileIndexer indexer)
 	{
 		try
 		{
+			//create a random access file to read
+			//lines when needed
 			rafile = new RandomAccessFile(file, "r");
 			this.indexer = indexer;
+			this.charCount = indexer.getCharCount();
+			this.lineCount = indexer.getLineCount();
+			this.refreshSize = 0;
+
+			//register as listener to detect content
+			//update
 			indexer.addListener(listener);
 		} catch (Exception e)
 		{
@@ -129,7 +143,7 @@ public class LargeFileContent implements StyledTextContent
 
 	public int getCharCount()
 	{
-		return indexer.getCharCount();
+		return charCount;
 	}
 
 	public String getLine(int lineIndex)
@@ -165,7 +179,7 @@ public class LargeFileContent implements StyledTextContent
 
 	public int getLineCount()
 	{
-		return indexer.getLineCount();
+		return lineCount;
 	}
 
 	public String getLineDelimiter()
