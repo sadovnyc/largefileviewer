@@ -41,8 +41,8 @@ public class SpeedyView extends ViewPart
 				File file = new File(fileName);
 				indexerTh = new IndexerThread(new FileIndexer(CHUNK_SIZE), file);
 				indexerTh.setListener(listener);
-				indexerTh.start();
 				viewer.setContent(new LargeFileContent(file, indexerTh.getIndexer()));
+				indexerTh.start();
 			}
 		}
 		
