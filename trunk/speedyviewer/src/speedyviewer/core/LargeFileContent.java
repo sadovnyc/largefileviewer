@@ -80,27 +80,51 @@ public class LargeFileContent implements StyledTextContent
 
 	private IIndexerListener listener = new IIndexerListener()
 	{
+		private int count = 0;
 		public void newIndexChunk(FileIndexer indexer)
 		{
-			lineCount = indexer.getLineCount();
-			charCount = indexer.getCharCount();
-			Display.getDefault().syncExec(sendTextChangedEvent);
+			if(count > 10)
+			{
+				lineCount = indexer.getLineCount();
+				charCount = indexer.getCharCount();
+				Display.getDefault().syncExec(sendTextChangedEvent);
+				count = 0;
+			}
+			else
+				count++;
 		}
 
 		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len, int charCount)
 		{
-			sendTextChangingEvent.addedChars = charCount;
-			sendTextChangingEvent.addedLines = len;
-			sendTextChangingEvent.charOffset = indexer.getCharCount();
-			Display.getDefault().syncExec(sendTextChangingEvent);
+			if(count > 10)
+			{
+				sendTextChangingEvent.addedChars += charCount;
+				sendTextChangingEvent.addedLines += len;
+				sendTextChangingEvent.charOffset = LargeFileContent.this.charCount;
+				Display.getDefault().syncExec(sendTextChangingEvent);
+				sendTextChangingEvent.addedChars = 0;
+				sendTextChangingEvent.addedLines = 0;
+			}
+			else
+			{
+				sendTextChangingEvent.addedChars += charCount;
+				sendTextChangingEvent.addedLines += len;
+			}
 		}
 
 		public void indexingComplete(FileIndexer indexer)
 		{
-			lineCount = indexer.getLineCount();
-			charCount = indexer.getCharCount();
-//			Display.getDefault().syncExec(sendTextSetEvent);
-//			count = 0;
+			if(count > 0)
+			{
+				sendTextChangingEvent.charOffset = LargeFileContent.this.charCount;
+				Display.getDefault().syncExec(sendTextChangingEvent);
+				sendTextChangingEvent.addedChars = 0;
+				sendTextChangingEvent.addedLines = 0;
+				lineCount = indexer.getLineCount();
+				charCount = indexer.getCharCount();
+				Display.getDefault().syncExec(sendTextChangedEvent);
+			}
+			count = 0;
 		}
 	};
 
