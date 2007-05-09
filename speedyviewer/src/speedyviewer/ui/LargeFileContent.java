@@ -1,4 +1,4 @@
-package speedyviewer.core;
+package speedyviewer.ui;
 
 import java.io.RandomAccessFile;
 
@@ -9,6 +9,9 @@ import org.eclipse.swt.custom.TextChangeListener;
 import org.eclipse.swt.custom.TextChangedEvent;
 import org.eclipse.swt.custom.TextChangingEvent;
 import org.eclipse.swt.widgets.Display;
+
+import speedyviewer.core.FileIndexer;
+import speedyviewer.core.IIndexerListener;
 
 import java.io.File;
 import java.util.Vector;
