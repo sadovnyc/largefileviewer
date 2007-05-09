@@ -12,7 +12,6 @@ import org.eclipse.ui.part.ViewPart;
 import speedyviewer.core.FileIndexer;
 import speedyviewer.core.IIndexerListener;
 import speedyviewer.core.IndexerThread;
-import speedyviewer.core.LargeFileContent;
 
 
 /**
