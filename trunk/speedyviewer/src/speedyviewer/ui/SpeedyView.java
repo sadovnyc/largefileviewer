@@ -1,4 +1,4 @@
-package speedyviewer.views;
+package speedyviewer.ui;
 
 import java.io.File;
 

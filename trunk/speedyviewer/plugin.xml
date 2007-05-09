@@ -8,7 +8,7 @@
             name="speedy"/>
       <view
             category="speedyviewer"
-            class="speedyviewer.views.SpeedyView"
+            class="speedyviewer.ui.SpeedyView"
             icon="icons/sample.gif"
             id="speedyviewer.views.SpeedyView"
             name="Speedy View"/>
