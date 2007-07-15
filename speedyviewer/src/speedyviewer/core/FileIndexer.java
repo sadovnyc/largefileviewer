@@ -3,9 +3,6 @@ package speedyviewer.core;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Vector;
-
-import speedyviewer.util.ChunkIntArray;
 
 /**
  * This class indexes the lines in a text file.
@@ -17,12 +14,8 @@ import speedyviewer.util.ChunkIntArray;
  * reallocating, thus performing better for huge files (many
  * millions of lines). 
  */
-public class FileIndexer
+public class FileIndexer extends AbstractFileIndexer
 {
-	private int charCount = 0;
-	private Vector<IIndexerListener> listeners = new Vector<IIndexerListener>();
-	private ChunkIntArray index;
-
 	/**
 	 * Create an indexer with the specified chunk size.
 	 * 
@@ -30,8 +23,7 @@ public class FileIndexer
 	 */
 	public FileIndexer(int chunkSize)
 	{
-		super();
-		index = new ChunkIntArray(chunkSize);
+		super(chunkSize);
 	}
 
 	/**
@@ -43,7 +35,7 @@ public class FileIndexer
 	 */
 	public void index(File file) throws IOException
 	{
-		int[] chunk = new int[index.getChunksize()];
+		int[] chunk = new int[getChunkSize()];
 
 		//read buffer
 		byte[] buffer = new byte[1024*256];
@@ -84,7 +76,7 @@ public class FileIndexer
 					if(line == chunk.length)
 					{
 						sendIndexChunk(chunk, line, bufferOffset + i + 1 - chunk[0]);
-						chunk = new int[index.getChunksize()];
+						chunk = new int[getChunkSize()];
 						line = 0;
 					}
 					//next line starts from the character after new line 
@@ -110,119 +102,5 @@ public class FileIndexer
 		System.out.println("computation time (ms):" + computation + " reading time (ms):" + reading);
 		inputStream.close();
 	}
-
-	/**
-	 * Clears the index.
-	 * 
-	 */
-	public void clear()
-	{
-		synchronized(index)
-		{
-			index.clear();
-			charCount = 0;
-		}
-	}
-
-	protected void sendIndexChunk(int[] indexChunk, int len, int chunkCharCount)
-	{
-		//create a temporary array for notifications
-		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
-
-		for (IIndexerListener listener : listenerArray)
-			listener.addingIndexChunk(this, indexChunk, len, chunkCharCount);
-		
-		synchronized(index)
-		{
-			index.add(indexChunk, len);
-			charCount += chunkCharCount;
-		}
-
-		for (IIndexerListener listener : listenerArray)
-			listener.newIndexChunk(this);
-	}
 	
-	protected int getChunkSize()
-	{
-		return index.getChunksize();
-	}
-
-	public int getLineCount()
-	{
-		synchronized(index)
-		{
-			return index.size();
-		}
-	}
-
-	public int getOffsetForLine(int line)
-	{
-		synchronized(index)
-		{
-			if(line < index.size())
-				return index.get(line);
-			else if(line == index.size())
-				return charCount;
-			else
-				throw new ArrayIndexOutOfBoundsException();
-		}
-	}
-
-	public int getLineForOffset(int offset)
-	{
-		int line;
-		int min;
-		int max;
-		int off1;
-		int off2;
-
-		synchronized (index)
-		{
-			//allow offset at end of file
-			if( charCount > 0 && offset >= charCount)
-				return index.size() - 1; //size is always > 0
-
-			min = 0;
-			max = index.size() - 1; //size is always > 0
-			
-			//treat max == 0 as special case, otherwise
-			//line+1 below would be > max
-			//max < 0 means index.size() == 0
-			if(max <= 0)
-				return 0;
-
-			do
-			{
-				line = min + (max - min)/2;
-				off1 = index.get(line);
-				off2 = index.get(line+1);
-				if(offset >= off1 && offset < off2)
-					max = min = line; // found
-				else if(offset >= off2)
-					min = line + 1;
-				else
-					max = line - 1;
-			}
-			while(max > min);
-		}
-		
-		line = min + (max - min)/2;
-		
-		return line;
-	}
-
-	public int getCharCount()
-	{
-		synchronized (index)
-		{
-			return charCount;
-		}
-	}
-
-	public void addListener(IIndexerListener listener)
-	{
-		if(listener != null)
-			listeners.add(listener);
-	}
-
 }

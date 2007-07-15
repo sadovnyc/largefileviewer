@@ -16,7 +16,7 @@ public class IndexerThread extends Thread
 	private File file;
 
 	//the indexer
-	private FileIndexer indexer;
+	private AbstractFileIndexer indexer;
 	
 	/**
 	 * Creates a thread to index the given file.
@@ -24,7 +24,7 @@ public class IndexerThread extends Thread
 	 * @param chunkSize the size of index chunks.
 	 * @param file the file to index.
 	 */
-	public IndexerThread(FileIndexer indexer, File file)
+	public IndexerThread(AbstractFileIndexer indexer, File file)
 	{
 		super("indexing:" + file.getPath());
 		this.file = file;
@@ -87,7 +87,7 @@ public class IndexerThread extends Thread
 		return indexer.getCharCount();
 	}
 	
-	public synchronized FileIndexer getIndexer()
+	public synchronized AbstractFileIndexer getIndexer()
 	{
 		return indexer;
 	}

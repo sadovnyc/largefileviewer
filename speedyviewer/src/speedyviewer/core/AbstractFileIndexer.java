@@ -1,0 +1,138 @@
+package speedyviewer.core;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Vector;
+
+import speedyviewer.util.ChunkIntArray;
+
+public abstract class AbstractFileIndexer
+{
+
+	protected int charCount = 0;
+	protected Vector<IIndexerListener> listeners = new Vector<IIndexerListener>();
+	protected ChunkIntArray index;
+
+	public AbstractFileIndexer(int chunkSize)
+	{
+		super();
+		index = new ChunkIntArray(chunkSize);
+	}
+
+	protected int getChunkSize()
+	{
+		return index.getChunksize();
+	}
+
+	protected void sendIndexChunk(int[] indexChunk, int len, int chunkCharCount)
+	{
+		//create a temporary array for notifications
+		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
+	
+		for (IIndexerListener listener : listenerArray)
+			listener.addingIndexChunk(this, indexChunk, len, chunkCharCount);
+		
+		synchronized(index)
+		{
+			index.add(indexChunk, len);
+			charCount += chunkCharCount;
+		}
+	
+		for (IIndexerListener listener : listenerArray)
+			listener.newIndexChunk(this);
+	}
+
+	/**
+	 * Clears the index.
+	 * 
+	 */
+	public void clear()
+	{
+		synchronized(index)
+		{
+			index.clear();
+			charCount = 0;
+		}
+	}
+
+	public int getLineCount()
+	{
+		synchronized(index)
+		{
+			return index.size();
+		}
+	}
+
+	public int getCharCount()
+	{
+		synchronized (index)
+		{
+			return charCount;
+		}
+	}
+
+	public int getLineForOffset(int offset)
+	{
+		int line;
+		int min;
+		int max;
+		int off1;
+		int off2;
+	
+		synchronized (index)
+		{
+			//allow offset at end of file
+			if( charCount > 0 && offset >= charCount)
+				return index.size() - 1; //size is always > 0
+	
+			min = 0;
+			max = index.size() - 1; //size is always > 0
+			
+			//treat max == 0 as special case, otherwise
+			//line+1 below would be > max
+			//max < 0 means index.size() == 0
+			if(max <= 0)
+				return 0;
+	
+			do
+			{
+				line = min + (max - min)/2;
+				off1 = index.get(line);
+				off2 = index.get(line+1);
+				if(offset >= off1 && offset < off2)
+					max = min = line; // found
+				else if(offset >= off2)
+					min = line + 1;
+				else
+					max = line - 1;
+			}
+			while(max > min);
+		}
+		
+		line = min + (max - min)/2;
+		
+		return line;
+	}
+
+	public int getOffsetForLine(int line)
+	{
+		synchronized(index)
+		{
+			if(line < index.size())
+				return index.get(line);
+			else if(line == index.size())
+				return charCount;
+			else
+				throw new ArrayIndexOutOfBoundsException();
+		}
+	}
+
+	public void addListener(IIndexerListener listener)
+	{
+		if(listener != null)
+			listeners.add(listener);
+	}
+
+	public abstract void index(File file) throws IOException;
+
+}
