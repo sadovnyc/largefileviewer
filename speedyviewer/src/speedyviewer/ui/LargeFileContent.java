@@ -39,15 +39,27 @@ public class LargeFileContent implements StyledTextContent
 	//the indexer
 	private FileIndexer indexer;
 
-	//own copy of lengths
+	/**
+	 * Number of characters, including line separators
+	 */
 	private int charCount;
+
+	/**
+	 * Number of lines, as should be reported by getLine() according
+	 * to StyledTextContent interface contract, i.e. the number of
+	 * separators plus one.
+	 */
 	private int lineCount;
 	
-	private int refreshSize;
-
 	//stores text listeners for event sending
 	private Vector textListeners = new Vector();
 
+	/**
+	 * Runnable used to send text updates in UI thread.
+	 * 
+	 * @author fab
+	 *
+	 */
 	private class TextChangingEventSender implements Runnable
 	{
 		public int addedLines;
@@ -88,7 +100,7 @@ public class LargeFileContent implements StyledTextContent
 		{
 			if(count > 10)
 			{
-				lineCount = indexer.getLineCount();
+				lineCount = indexer.getLineCount() + 1;
 				charCount = indexer.getCharCount();
 				Display.getDefault().syncExec(sendTextChangedEvent);
 				count = 0;
@@ -123,7 +135,7 @@ public class LargeFileContent implements StyledTextContent
 				Display.getDefault().syncExec(sendTextChangingEvent);
 				sendTextChangingEvent.addedChars = 0;
 				sendTextChangingEvent.addedLines = 0;
-				lineCount = indexer.getLineCount();
+				lineCount = indexer.getLineCount() + 1;
 				charCount = indexer.getCharCount();
 				Display.getDefault().syncExec(sendTextChangedEvent);
 			}
@@ -148,11 +160,9 @@ public class LargeFileContent implements StyledTextContent
 			rafile = new RandomAccessFile(file, "r");
 			this.indexer = indexer;
 			this.charCount = indexer.getCharCount();
-			this.lineCount = indexer.getLineCount();
-			this.refreshSize = 0;
+			this.lineCount = indexer.getLineCount() + 1;
 
-			//register as listener to detect content
-			//update
+			//register as listener to detect index update
 			indexer.addListener(listener);
 		} catch (Exception e)
 		{
@@ -201,14 +211,32 @@ public class LargeFileContent implements StyledTextContent
 
 	public int getLineAtOffset(int offset)
 	{
+		/*
+		 * as per interface contract, if offset is
+		 * the number of chars, return the number of lines,
+		 * intended as number of line separators.
+		 */
+		if( offset >= charCount )
+			return lineCount - 1;
+
 		return indexer.getLineForOffset(offset);
 	}
 
+	/**
+	 * Get the line count.
+	 * 
+	 * @see org.eclipse.swt.custom.StyledTextContent#getLineCount()
+	 */
 	public int getLineCount()
 	{
 		return lineCount;
 	}
 
+	/**
+	 * Get the line delimiter.
+	 * 
+	 * @see org.eclipse.swt.custom.StyledTextContent#getLineDelimiter()
+	 */
 	public String getLineDelimiter()
 	{
 		return LINE_DELIMITER;
@@ -216,6 +244,9 @@ public class LargeFileContent implements StyledTextContent
 
 	public int getOffsetAtLine(int lineIndex)
 	{
+		if(lineIndex >= lineCount)
+			return charCount;
+
 		return indexer.getOffsetForLine(lineIndex);
 	}
 
