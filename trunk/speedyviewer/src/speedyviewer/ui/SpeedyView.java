@@ -9,6 +9,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.part.ViewPart;
 
+import speedyviewer.core.AbstractFileIndexer;
 import speedyviewer.core.FileIndexer;
 import speedyviewer.core.IIndexerListener;
 import speedyviewer.core.IndexerThread;
@@ -40,7 +41,7 @@ public class SpeedyView extends ViewPart
 				File file = new File(fileName);
 				indexerTh = new IndexerThread(new FileIndexer(CHUNK_SIZE), file);
 				indexerTh.setListener(listener);
-				viewer.setContent(new LargeFileContent(file, indexerTh.getIndexer()));
+				viewer.setContent(new LargeFileContent(file, (FileIndexer)indexerTh.getIndexer()));
 				indexerTh.start();
 			}
 		}
@@ -69,15 +70,15 @@ public class SpeedyView extends ViewPart
 	};
 
 	private IIndexerListener listener = new IIndexerListener() {
-		public void newIndexChunk(FileIndexer indexer)
+		public void newIndexChunk(AbstractFileIndexer indexer)
 		{
 			//run update in the UI thread (this listener is called
 			//from the indexer thread and can not call UI methods)
 			SpeedyView.this.getViewSite().getShell().getDisplay().asyncExec(new ViewUpdate(indexer.getLineCount()));
 		}
 
-		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len, int charCount) {}
-		public void indexingComplete(FileIndexer indexer) {}
+		public void addingIndexChunk(AbstractFileIndexer indexer, int[] chunk, int len, int charCount) {}
+		public void indexingComplete(AbstractFileIndexer indexer) {}
 	};
 
 	/**

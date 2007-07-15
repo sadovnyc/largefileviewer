@@ -10,6 +10,7 @@ import org.eclipse.swt.custom.TextChangedEvent;
 import org.eclipse.swt.custom.TextChangingEvent;
 import org.eclipse.swt.widgets.Display;
 
+import speedyviewer.core.AbstractFileIndexer;
 import speedyviewer.core.FileIndexer;
 import speedyviewer.core.IIndexerListener;
 
@@ -96,7 +97,7 @@ public class LargeFileContent implements StyledTextContent
 	private IIndexerListener listener = new IIndexerListener()
 	{
 		private int count = 0;
-		public void newIndexChunk(FileIndexer indexer)
+		public void newIndexChunk(AbstractFileIndexer indexer)
 		{
 			if(count > 10)
 			{
@@ -109,7 +110,7 @@ public class LargeFileContent implements StyledTextContent
 				count++;
 		}
 
-		public void addingIndexChunk(FileIndexer indexer, int[] chunk, int len, int charCount)
+		public void addingIndexChunk(AbstractFileIndexer indexer, int[] chunk, int len, int charCount)
 		{
 			if(count > 10)
 			{
@@ -127,7 +128,7 @@ public class LargeFileContent implements StyledTextContent
 			}
 		}
 
-		public void indexingComplete(FileIndexer indexer)
+		public void indexingComplete(AbstractFileIndexer indexer)
 		{
 			if(count > 0)
 			{
