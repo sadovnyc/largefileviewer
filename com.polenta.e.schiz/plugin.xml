@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.polenta.e.schiz.orario.editors.OrarioEditor"
+            default="true"
+            extensions="orario"
+            filenames="*.orario,*.oxml"
+            icon="icons/sample.gif"
+            id="orario.editors.OrarioEditor"
+            name="orario editor"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="orario.views"
+            name="Orario Views"/>
+      <view
+            category="orario.views"
+            class="com.polenta.e.schiz.orario.views.ActivityView"
+            id="orario.views.ActivityView"
+            name="Activity View"/>
+   </extension>
+
+</plugin>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE orario [
+<!ELEMENT orario (day+)>
+<!ATTLIST orario version CDATA #REQUIRED>
+<!ELEMENT day (activity+)>
+<!ATTLIST day date CDATA #REQUIRED>
+<!ELEMENT activity EMPTY>
+<!ATTLIST activity range CDATA #REQUIRED>
+<!ATTLIST activity type CDATA #REQUIRED>
+<!ATTLIST activity name CDATA #REQUIRED>
+]>
+
+<orario version="0.1">
+
+<day date="2005.09.12">
+ <activity range="14:30-16:30" type="mail" name="mail"/>
+ <activity range="16:30-20:00" type="review" name="luigi's OCRs"/>
+</day>
+
+<day date="2005.09.13">
+ <activity range="09:00-10:00" type="development" name="java"/>
+ <activity range="10:00-12:30" type="development" name="avm: ahm routing"/>
+ <activity range="13:30-18:00" type="debug" name="avm: ahm routing"/>
+</day>
+
+<day date="2005.09.14">
+ <activity range="09:00-12:30" type="debug" name="avm: ahm routing"/>
+ <activity range="13:30-14:30" type="mail" name="mail"/>
+ <activity range="14:30-18:30" type="development" name="avm: ahm collision detection"/>
+</day>
+
+<day date="2005.09.15">
+ <activity range="10:00-12:30" type="development" name="avm: ahm collision detection"/>
+ <activity range="13:30-19:30" type="debug" name="java: jbed5 on vision"/>
+</day>
+
+<day date="2005.09.16">
+ <activity range="09:10-10:00" type="development" name="java: jbed6 integration"/>
+ <activity range="10:00-12:30" type="debug" name="java: jbed5 on vision"/>
+ <activity range="13:30-14:30" type="development" name="java: jbed6 integration"/>
+ <activity range="14:30-15:30" type="debug" name="java: jbed5 on vision"/>
+ <activity range="15:30-17:00" type="development" name="java: jbed6 integration"/>
+</day>
+
+<day date="2005.09.19">
+ <activity range="10:20-12:20" type="development" name="java: jbed6 integration"/>
+ <activity range="13:40-18:00" type="development" name="java: jbed6 integration"/>
+</day>
+
+<day date="2005.09.20">
+ <activity range="09:00-09:30" type="mail" name="mail"/>
+ <activity range="09:30-12:45" type="training" name="UML"/>
+ <activity range="13:15-17:00" type="training" name="UML"/>
+ <activity range="17:00-18:00" type="mail" name="mail"/>
+</day>
+
+<day date="2005.09.21">
+ <activity range="09:00-12:15" type="training" name="UML"/>
+ <activity range="13:00-17:30" type="training" name="UML"/>
+ <activity range="17:30-19:30" type="mail" name="mail"/>
+</day>
+
+<day date="2005.09.22">
+ <activity range="09:00-12:15" type="training" name="UML"/>
+ <activity range="13:00-17:30" type="training" name="UML"/>
+ <activity range="17:30-19:00" type="debug" name="java: jbed5 on vision"/>
+</day>
+
+<day date="2005.09.23">
+ <activity range="10:30-11:30" type="mail" name="mail"/>
+ <activity range="11:30-12:30" type="development" name="avm: accessory detection"/>
+ <activity range="13:30-18:30" type="development" name="avm: accessory detection"/>
+</day>
+
+<day date="2005.09.26">
+ <activity range="09:05-12:30" type="development" name="avm: accessory detection"/>
+ <activity range="13:30-18:30" type="debug" name="avm"/>
+</day>
+
+<day date="2005.09.27">
+ <activity range="09:00-10:30" type="mail" name="java"/>
+ <activity range="10:30-12:30" type="debug" name="avm"/>
+ <activity range="13:30-15:20" type="debug" name="avm"/>
+ <activity range="17:00-20:20" type="debug" name="avm"/>
+</day>
+
+<day date="2005.09.28">
+ <activity range="09:30-12:30" type="debug" name="avm"/>
+ <activity range="13:40-19:00" type="debug" name="avm"/>
+</day>
+
+</orario>

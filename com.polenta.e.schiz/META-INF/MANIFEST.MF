@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Orario Plug-in
+Bundle-SymbolicName: com.polenta.e.schiz;singleton:=true
+Bundle-Version: 1.0.9
+Bundle-ClassPath: orario.jar
+Bundle-Activator: com.polenta.e.schiz.orario.OrarioPlugin
+Bundle-Vendor: Fabrizio
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.ui.ide
+Eclipse-LazyStart: true
+Import-Package: org.eclipse.ui.editors.text,
+ org.eclipse.ui.views.contentoutline
