@@ -12,10 +12,16 @@ import java.io.IOException;
  * The internal storage is a List of arrays (called chunks)
  * all of the same size. This allows the index to grow without
  * reallocating, thus performing better for huge files (many
- * millions of lines). 
+ * millions of lines).
+ * 
+ * Additional parsing (on a per line basis) can be implemented
+ * by subclassing this class and overriding processLine().
+ * 
  */
 public class FileIndexer extends AbstractFileIndexer
 {
+	private static final int MAX_LINE_LENGTH = 1024;
+
 	/**
 	 * Create an indexer with the specified chunk size.
 	 * 
@@ -46,7 +52,10 @@ public class FileIndexer extends AbstractFileIndexer
 		int line = 0;
 		
 		int bytesInLine = 0;
-		
+
+		//line buffer used for further line processing
+		byte[] lineBuffer = new byte[MAX_LINE_LENGTH];
+
 		//for statistics
 		long start = 0;
 		long computation = 0;
@@ -68,10 +77,18 @@ public class FileIndexer extends AbstractFileIndexer
 			//now scan the read buffer
 			for(int i=0 ; i < len ; i++)
 			{
+				//copy character (byte) to line buffer
+				if(bytesInLine < MAX_LINE_LENGTH )
+					lineBuffer[bytesInLine] = buffer[i];
+
 				bytesInLine++;
+
 				//check for newline: ascii code 10
 				if(buffer[i] == 10 /*|| bytesInLine > 256*/) //doesn't work when using ReadLine() -> needs buffer.
 				{
+					//optional line processing
+					processLine(lineBuffer, bytesInLine, line);
+
 					//if the chunk is already full 'send' it and create a new one
 					if(line == chunk.length)
 					{
@@ -103,4 +120,18 @@ public class FileIndexer extends AbstractFileIndexer
 		inputStream.close();
 	}
 	
+	/**
+	 * This function is called every time a newline is encountered.
+	 * 
+	 * This is just a stub implementation, override this to add your
+	 * own specific per-line parsing.
+	 * 
+	 * @param lineBuffer the line, as buffer of bytes
+	 * @param length the number of valid characters in the buffer (line length)
+	 * @param lineIndex the line index
+	 */
+	protected void processLine( byte[] lineBuffer, int length, int lineIndex)
+	{
+		// let subclasses do whatever they want here
+	}
 }
