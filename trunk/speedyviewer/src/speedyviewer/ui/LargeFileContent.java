@@ -53,7 +53,7 @@ public class LargeFileContent implements StyledTextContent
 	private int lineCount;
 	
 	//stores text listeners for event sending
-	private Vector textListeners = new Vector();
+	private Vector<TextChangeListener> textListeners = new Vector<TextChangeListener>();
 
 	/**
 	 * Runnable used to send text updates in UI thread.
@@ -142,12 +142,18 @@ public class LargeFileContent implements StyledTextContent
 			}
 			count = 0;
 		}
+
+		@Override
+		public boolean isCanceled()
+		{
+			return false;
+		}
 	};
 
 	/**
 	 * Constructor.
 	 * Note that the class will not start indexing, this
-	 * has to be done by the clinet.
+	 * has to be done by the client.
 	 * 
 	 * @param file the file to read from.
 	 * @param indexer the indexer to use.

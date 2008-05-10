@@ -1,5 +1,5 @@
 <uml>
-   <greenVersion="20500"/>
+   <greenVersion="30000"/>
    <type>
       <name="=speedyviewer/src<speedyviewer.core{IndexerThread.java[IndexerThread"/>
       <height="-1"/>
@@ -35,20 +35,6 @@
       <x="24"/>
       <y="55"/>
    </type>
-   <relationship>
-      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
-      <sourceType="=speedyviewer/src<speedyviewer.core{FileIndexer.java[FileIndexer"/>
-      <targetType="=speedyviewer/src<speedyviewer.core{AbstractFileIndexer.java[AbstractFileIndexer"/>
-      <bendpoints>
-      </bendpoints>
-   </relationship>
-   <relationship>
-      <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
-      <sourceType="=speedyviewer/src<speedyviewer.core{AbstractFileIndexer.java[AbstractFileIndexer"/>
-      <targetType="=speedyviewer/src<speedyviewer.util{ChunkIntArray.java[ChunkIntArray"/>
-      <bendpoints>
-      </bendpoints>
-   </relationship>
    <type>
       <name="=speedyviewer/src<speedyviewer.core{FileIndex.java[FileIndex"/>
       <height="-1"/>
@@ -60,6 +46,20 @@
       <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
       <sourceType="=speedyviewer/src<speedyviewer.core{FileIndex.java[FileIndex"/>
       <targetType="=speedyviewer/src<speedyviewer.util{ChunkIntArray.java[ChunkIntArray"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.composition.CompositionPart"/>
+      <sourceType="=speedyviewer/src<speedyviewer.core{AbstractFileIndexer.java[AbstractFileIndexer"/>
+      <targetType="=speedyviewer/src<speedyviewer.util{ChunkIntArray.java[ChunkIntArray"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.generalization.GeneralizationPart"/>
+      <sourceType="=speedyviewer/src<speedyviewer.core{FileIndexer.java[FileIndexer"/>
+      <targetType="=speedyviewer/src<speedyviewer.core{AbstractFileIndexer.java[AbstractFileIndexer"/>
       <bendpoints>
       </bendpoints>
    </relationship>

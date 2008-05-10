@@ -70,7 +70,9 @@ public class FileIndexer extends AbstractFileIndexer
 		//add first line (offset 0)
 		chunk[line++] = 0;
 	
-		while( (len = inputStream.read(buffer)) > 0)
+		
+outerloop:
+	    while( (len = inputStream.read(buffer)) > 0)
 		{
 			reading += System.currentTimeMillis() - start;
 			start = System.currentTimeMillis();
@@ -92,9 +94,11 @@ public class FileIndexer extends AbstractFileIndexer
 					//if the chunk is already full 'send' it and create a new one
 					if(line == chunk.length)
 					{
-						sendIndexChunk(chunk, line, bufferOffset + i + 1 - chunk[0]);
+						boolean cancel = sendIndexChunk(chunk, line, bufferOffset + i + 1 - chunk[0]);
 						chunk = new int[getChunkSize()];
 						line = 0;
+						if(cancel)
+							break outerloop;
 					}
 					//next line starts from the character after new line 
 					chunk[line++] = bufferOffset + i + 1;

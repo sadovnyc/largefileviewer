@@ -24,8 +24,10 @@ public abstract class AbstractFileIndexer
 		return index.getChunksize();
 	}
 
-	protected void sendIndexChunk(int[] indexChunk, int len, int chunkCharCount)
+	protected boolean sendIndexChunk(int[] indexChunk, int len, int chunkCharCount)
 	{
+		boolean cancel = false;
+
 		//create a temporary array for notifications
 		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
 	
@@ -40,6 +42,15 @@ public abstract class AbstractFileIndexer
 	
 		for (IIndexerListener listener : listenerArray)
 			listener.newIndexChunk(this);
+
+		for (IIndexerListener listener : listenerArray)
+			if ( listener.isCanceled() )
+			{
+				cancel = true;
+				break;
+			}
+		
+		return cancel;
 	}
 
 	/**
