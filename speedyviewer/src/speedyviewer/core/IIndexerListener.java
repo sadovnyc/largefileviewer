@@ -26,4 +26,11 @@ public interface IIndexerListener
 	public void newIndexChunk(AbstractFileIndexer indexer);
 	
 	public void indexingComplete(AbstractFileIndexer indexer);
+
+	/**
+	 * Used by the indexer to check if the indexing should stop.
+	 * 
+	 * @return true if the indexing should stop.
+	 */
+	public boolean isCanceled();
 }
