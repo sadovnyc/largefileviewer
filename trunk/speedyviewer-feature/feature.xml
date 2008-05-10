@@ -2,21 +2,27 @@
 <feature
       id="org.polenta.e.schiz.speedyviewer"
       label="Speedy Viewer"
-      version="1.0.0"
+      version="1.0.1"
       provider-name="noaltri"
       plugin="speedyviewer">
 
    <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+      Viewer to show text files without loading the whole content in memory
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+      Copyright noaltri
    </copyright>
 
    <license url="http://www.example.com/license">
-      [Enter License Description here.]
+      Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
    </license>
+
+   <url>
+      <update label="speedyviewer" url="http://largefileviewer.googlecode.com/svn/trunk/speedyviewer-update-site"/>
+   </url>
 
    <plugin
          id="speedyviewer"
