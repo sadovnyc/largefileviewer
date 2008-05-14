@@ -10,7 +10,7 @@ public abstract class AbstractFileIndexer
 {
 
 	protected int charCount = 0;
-	protected Vector<IIndexerListener> listeners = new Vector<IIndexerListener>();
+	protected Vector<IIndexerMonitor> listeners = new Vector<IIndexerMonitor>();
 	protected ChunkIntArray index;
 
 	public AbstractFileIndexer(int chunkSize)
@@ -29,9 +29,9 @@ public abstract class AbstractFileIndexer
 		boolean cancel = false;
 
 		//create a temporary array for notifications
-		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
+		IIndexerMonitor[] listenerArray = listeners.toArray(new IIndexerMonitor[listeners.size()]);
 	
-		for (IIndexerListener listener : listenerArray)
+		for (IIndexerMonitor listener : listenerArray)
 			listener.addingIndexChunk(this, indexChunk, len, chunkCharCount);
 		
 		synchronized(index)
@@ -40,10 +40,10 @@ public abstract class AbstractFileIndexer
 			charCount += chunkCharCount;
 		}
 	
-		for (IIndexerListener listener : listenerArray)
+		for (IIndexerMonitor listener : listenerArray)
 			listener.newIndexChunk(this);
 
-		for (IIndexerListener listener : listenerArray)
+		for (IIndexerMonitor listener : listenerArray)
 			if ( listener.isCanceled() )
 			{
 				cancel = true;
@@ -138,7 +138,7 @@ public abstract class AbstractFileIndexer
 		}
 	}
 
-	public void addListener(IIndexerListener listener)
+	public void addListener(IIndexerMonitor listener)
 	{
 		if(listener != null)
 			listeners.add(listener);

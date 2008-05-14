@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Display;
 
 import speedyviewer.core.AbstractFileIndexer;
 import speedyviewer.core.FileIndexer;
-import speedyviewer.core.IIndexerListener;
+import speedyviewer.core.IIndexerMonitor;
 
 import java.io.File;
 import java.util.Vector;
@@ -94,7 +94,7 @@ public class LargeFileContent implements StyledTextContent
 		}
 	};
 
-	private IIndexerListener listener = new IIndexerListener()
+	private IIndexerMonitor listener = new IIndexerMonitor()
 	{
 		private int count = 0;
 		public void newIndexChunk(AbstractFileIndexer indexer)

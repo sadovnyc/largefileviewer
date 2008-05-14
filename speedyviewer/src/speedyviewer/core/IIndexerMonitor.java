@@ -5,7 +5,7 @@ package speedyviewer.core;
  * when a new index chunk is available.
  * 
  */
-public interface IIndexerListener
+public interface IIndexerMonitor
 {
 
 	/**

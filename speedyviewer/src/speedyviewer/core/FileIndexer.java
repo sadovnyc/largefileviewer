@@ -116,8 +116,8 @@ outerloop:
 			sendIndexChunk(chunk, line, bufferOffset - chunk[0]);
 	
 		//create a temporary array for notifications
-		IIndexerListener[] listenerArray = listeners.toArray(new IIndexerListener[listeners.size()]);
-		for (IIndexerListener listener : listenerArray)
+		IIndexerMonitor[] listenerArray = listeners.toArray(new IIndexerMonitor[listeners.size()]);
+		for (IIndexerMonitor listener : listenerArray)
 			listener.indexingComplete(this);
 
 		System.out.println("computation time (ms):" + computation + " reading time (ms):" + reading);
