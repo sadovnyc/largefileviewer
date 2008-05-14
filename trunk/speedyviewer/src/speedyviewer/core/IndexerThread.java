@@ -72,7 +72,7 @@ public class IndexerThread extends Thread
 	 * 
 	 * @param listener
 	 */
-	public void setListener(IIndexerListener listener)
+	public void setListener(IIndexerMonitor listener)
 	{
 		indexer.addListener(listener);
 	}

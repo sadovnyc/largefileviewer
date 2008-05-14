@@ -12,7 +12,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import speedyviewer.core.AbstractFileIndexer;
 import speedyviewer.core.FileIndexer;
-import speedyviewer.core.IIndexerListener;
+import speedyviewer.core.IIndexerMonitor;
 import speedyviewer.core.IndexerThread;
 
 
@@ -93,7 +93,7 @@ public class SpeedyView extends ViewPart
 		}
 	};
 
-	private IIndexerListener listener = new IIndexerListener() {
+	private IIndexerMonitor listener = new IIndexerMonitor() {
 		public void newIndexChunk(AbstractFileIndexer indexer)
 		{
 			long percent = 100;
