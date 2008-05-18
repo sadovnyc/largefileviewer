@@ -95,10 +95,13 @@ outerloop:
 					if(line == chunk.length)
 					{
 						boolean cancel = sendIndexChunk(chunk, line, bufferOffset + i + 1 - chunk[0]);
-						chunk = new int[getChunkSize()];
 						line = 0;
+						// check if the monitor has canceled, if so
+						// break the outmost loop and do not allocate
+						// a new chunk
 						if(cancel)
 							break outerloop;
+						chunk = new int[getChunkSize()];
 					}
 					//next line starts from the character after new line 
 					chunk[line++] = bufferOffset + i + 1;
