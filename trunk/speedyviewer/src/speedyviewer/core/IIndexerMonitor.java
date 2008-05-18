@@ -25,6 +25,11 @@ public interface IIndexerMonitor
 	 */
 	public void newIndexChunk(AbstractFileIndexer indexer);
 	
+	/**
+	 * The indexing is complete.
+	 * 
+	 * @param indexer the indexer
+	 */
 	public void indexingComplete(AbstractFileIndexer indexer);
 
 	/**
