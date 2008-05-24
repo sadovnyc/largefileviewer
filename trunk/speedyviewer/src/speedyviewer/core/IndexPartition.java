@@ -16,17 +16,16 @@ public class IndexPartition
 	private long length;
 
 	/**
-	 * Create a partition starting at the given position
-	 * and of the given length.
+	 * Create a partition with the given span.
 	 * 
-	 * @param firstIndex starting position.
-	 * @param length length of the selection
+	 * @param firstIndex starting position (including).
+	 * @param lastIndex ending position (including).
 	 */
-	public IndexPartition(long firstIndex, long length)
+	public IndexPartition(long firstIndex, long lastIndex)
 	{
 		super();
 		this.firstIndex = firstIndex;
-		this.length = length;
+		this.length = lastIndex - firstIndex + 1;
 	}
 
 	/**
@@ -46,5 +45,20 @@ public class IndexPartition
 	{
 		return ( firstIndex <= position ) && 
 		( (firstIndex + length) >= position );
+	}
+	
+	public long getFirst()
+	{
+		return firstIndex;
+	}
+
+	public long getLast()
+	{
+		return firstIndex + length;
+	}
+
+	public long getLength()
+	{
+		return length;
 	}
 }
