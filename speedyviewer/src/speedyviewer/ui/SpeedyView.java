@@ -3,8 +3,12 @@ package speedyviewer.ui;
 import java.io.File;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.part.ViewPart;
@@ -12,6 +16,7 @@ import org.eclipse.ui.part.ViewPart;
 import speedyviewer.core.AbstractFileIndexer;
 import speedyviewer.core.FileIndexer;
 import speedyviewer.core.IIndexerMonitor;
+import speedyviewer.core.IndexPartition;
 import speedyviewer.core.IndexerThread;
 import speedyviewer.core.PartitioningFileIndexer;
 
@@ -28,8 +33,8 @@ public class SpeedyView extends ViewPart
 	private long fileSize;
 	private File file;
 	boolean cancel;
-	private static final String begin = "begin";
-	private static final String end   = "end";
+	private static final String begin = "BS starting";
+	private static final String end   = "BS ASC END";
 	
 	private Action loadFileAction = new Action()
 	{
@@ -115,6 +120,7 @@ public class SpeedyView extends ViewPart
 				@Override
 				public void run()
 				{
+					partitionsViewer.setInput( ((PartitioningFileIndexer)indexerTh.getIndexer()).getPartitions() );
 					viewer.setContent(new LargeFileContent(file, (FileIndexer)indexerTh.getIndexer()));
 					loadFileAction.setEnabled(true);
 					cancelAction.setEnabled(false);
@@ -128,6 +134,8 @@ public class SpeedyView extends ViewPart
 			return cancel;
 		}
 	};
+
+	private ListViewer partitionsViewer;
 
 	/**
 	 * The constructor.
@@ -144,7 +152,22 @@ public class SpeedyView extends ViewPart
 	 */
 	public void createPartControl(Composite parent)
 	{
-		viewer = new StyledText(parent, SWT.V_SCROLL);
+		SashForm sashForm = new SashForm(parent, SWT.NONE);
+		
+		partitionsViewer = new ListViewer( sashForm, SWT.V_SCROLL | SWT.H_SCROLL );
+		partitionsViewer.setContentProvider(new ArrayContentProvider());
+		partitionsViewer.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof IndexPartition) {
+					IndexPartition partition = (IndexPartition) element;
+					return "[" + partition.getFirst() + "," + partition.getLast() + "]";
+				}
+				return super.getText(element);
+			}
+		});
+
+		viewer = new StyledText(sashForm, SWT.V_SCROLL);
 
 		//add open file / cancel opening in drop down menu
 		loadFileAction.setText("Open File");
