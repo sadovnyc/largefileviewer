@@ -67,14 +67,15 @@ public class IndexerThread extends Thread
 	}
 	
 	/**
-	 * Set the index listener.
-	 * The listener is called from the indexer thread.
+	 * Add an index monitor.
 	 * 
-	 * @param listener
+	 * The monitor is called from the indexer thread.
+	 * 
+	 * @param monitor
 	 */
-	public void setListener(IIndexerMonitor listener)
+	public void addListener(IIndexerMonitor monitor)
 	{
-		indexer.addListener(listener);
+		indexer.addListener(monitor);
 	}
 	
 	public synchronized int getLineForOffset(int offset)

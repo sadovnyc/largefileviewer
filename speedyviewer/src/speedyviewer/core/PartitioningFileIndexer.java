@@ -96,7 +96,9 @@ public class PartitioningFileIndexer extends FileIndexer
 				else
 					startIndex = 0;
 
-				partitions.add( new IndexPartition( startIndex, lineIndex ) );
+				IndexPartition partition = new IndexPartition( startIndex, lineIndex );
+				notifyNewPartition( partition );
+				partitions.add( partition );
 			}
 		}
 	}
@@ -104,15 +106,19 @@ public class PartitioningFileIndexer extends FileIndexer
 	/**
 	 * Get the partitions found during indexing.
 	 * 
+	 * An unmodifiable copy of the internal list is returned.
+	 * 
 	 * @return the partition list.
 	 */
 	public List<IndexPartition> getPartitions()
 	{
-		int startIndex;
 		while( partitionStarts.size() > 0 )
 		{
+			int startIndex;
 			startIndex = partitionStarts.pop();
-			partitions.add( new IndexPartition( startIndex, getLineCount() - 1 ) );
+			IndexPartition partition = new IndexPartition( startIndex, getLineCount() - 1 );
+			notifyNewPartition( partition );
+			partitions.add( partition );
 		}
 		
 		Collections.sort(partitions, new Comparator<IndexPartition>() {
@@ -129,8 +135,27 @@ public class PartitioningFileIndexer extends FileIndexer
 					return 1;
 			}
 		});
-		return partitions;
+		return Collections.unmodifiableList( partitions );
 	}
 
+	/**
+	 * Notify all listeners that implement the IPartitioningListener
+	 * interface that a new partition has been created.
+	 * 
+	 * @param partition the new partition.
+	 */
+	private void notifyNewPartition( IndexPartition partition )
+	{
+		//create a temporary array for notifications
+		IIndexerMonitor[] listenerArray = listeners.toArray(new IIndexerMonitor[listeners.size()]);
 	
+		for (IIndexerMonitor listener : listenerArray)
+		{
+			if (listener instanceof IPartitioningListener) {
+				IPartitioningListener partListener = (IPartitioningListener) listener;
+				partListener.newPartition(this, partition);
+			}
+		}
+
+	}
 }
