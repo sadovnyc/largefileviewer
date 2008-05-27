@@ -53,11 +53,11 @@ public class SpeedyView extends ViewPart
 				cancelAction.setEnabled(true);
 
 				if(indexerTh != null)
-					indexerTh.setListener(null);
+					indexerTh.addListener(null);
 				file = new File(fileName);
 				fileSize = file.length();
 				indexerTh = new IndexerThread(new PartitioningFileIndexer(CHUNK_SIZE, begin, end), file);
-				indexerTh.setListener(listener);
+				indexerTh.addListener(listener);
 				// if set here, the text in the viewer will grow dynamically, the styled text
 				// does not do that nicely for very large files (many millions of lines)
 				// set it when indexing is complete (below)
