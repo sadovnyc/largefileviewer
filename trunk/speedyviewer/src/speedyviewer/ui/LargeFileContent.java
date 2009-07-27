@@ -179,7 +179,6 @@ public class LargeFileContent implements StyledTextContent
 
 	// TODO un distruttore per chiamare fileInputStream.finalize()
 
-	@SuppressWarnings("unchecked")
 	public void addTextChangeListener(TextChangeListener listener)
 	{
 		textListeners.addElement(listener);

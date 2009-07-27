@@ -20,7 +20,7 @@ import java.util.Stack;
  * @author iannetti
  *
  */
-public class PartitioningFileIndexer extends FileIndexer
+public class BeginEndPartitioner implements ILineProcessor
 {
 	private byte[] startMatch;
 	private byte[] endMatch;
@@ -35,26 +35,23 @@ public class PartitioningFileIndexer extends FileIndexer
 	 * Creates an indexer that computes partitions based on the given 
 	 * start/endMatch sequences.
 	 * 
-	 * @param chunkSize the index chunk (see {@link FileIndexer}).
 	 * @param startMatch the sequence identifying a partition start.
 	 * @param endMatch the sequence identifying a partition end.
 	 */
-	public PartitioningFileIndexer(int chunkSize, byte[] startMatch, byte[] endMatch)
+	public BeginEndPartitioner(byte[] startMatch, byte[] endMatch)
 	{
-		super(chunkSize);
 		this.startMatch = startMatch;
 		this.endMatch = endMatch;
 	}
 
-	public PartitioningFileIndexer(int chunkSize, String startMatch, String endMatch)
+	public BeginEndPartitioner(String startMatch, String endMatch)
 	{
-		super(chunkSize);
 		this.startMatch = startMatch.getBytes();
 		this.endMatch = endMatch.getBytes();
 	}
 
 	@Override
-	protected void processLine(byte[] lineBuffer, int length, int lineIndex)
+	public void processLine(byte[] lineBuffer, int length, int lineIndex)
 	{
 		int i;
 		int len = Math.min(lineBuffer.length, startMatch.length);
@@ -116,9 +113,10 @@ public class PartitioningFileIndexer extends FileIndexer
 		{
 			int startIndex;
 			startIndex = partitionStarts.pop();
-			IndexPartition partition = new IndexPartition( startIndex, getLineCount() - 1 );
-			notifyNewPartition( partition );
-			partitions.add( partition );
+			// TODO implement incomplete partitions
+//			IndexPartition partition = new IndexPartition( startIndex, getLineCount() - 1 );
+//			notifyNewPartition( partition );
+//			partitions.add( partition );
 		}
 		
 		Collections.sort(partitions, new Comparator<IndexPartition>() {
@@ -146,16 +144,17 @@ public class PartitioningFileIndexer extends FileIndexer
 	 */
 	private void notifyNewPartition( IndexPartition partition )
 	{
-		//create a temporary array for notifications
-		IIndexerMonitor[] listenerArray = listeners.toArray(new IIndexerMonitor[listeners.size()]);
-	
-		for (IIndexerMonitor listener : listenerArray)
-		{
-			if (listener instanceof IPartitioningListener) {
-				IPartitioningListener partListener = (IPartitioningListener) listener;
-				partListener.newPartition(this, partition);
-			}
-		}
+		// TODO: add listeer array
+//		//create a temporary array for notifications
+//		IIndexerMonitor[] listenerArray = listeners.toArray(new IIndexerMonitor[listeners.size()]);
+//	
+//		for (IIndexerMonitor listener : listenerArray)
+//		{
+//			if (listener instanceof IPartitioningListener) {
+//				IPartitioningListener partListener = (IPartitioningListener) listener;
+//				partListener.newPartition(this, partition);
+//			}
+//		}
 
 	}
 }

@@ -8,5 +8,5 @@ public interface IPartitioningListener
 	 * @param indexer
 	 * @param partition
 	 */
-	void newPartition(PartitioningFileIndexer indexer, IndexPartition partition);
+	void newPartition(BeginEndPartitioner indexer, IndexPartition partition);
 }

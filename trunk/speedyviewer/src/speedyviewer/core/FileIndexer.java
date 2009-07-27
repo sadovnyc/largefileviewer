@@ -3,6 +3,8 @@ package speedyviewer.core;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class indexes the lines in a text file.
@@ -21,6 +23,8 @@ import java.io.IOException;
 public class FileIndexer extends AbstractFileIndexer
 {
 	private static final int MAX_LINE_LENGTH = 1024;
+
+	private List<ILineProcessor> lineProcessors = new ArrayList<ILineProcessor>();
 
 	/**
 	 * Create an indexer with the specified chunk size.
@@ -42,6 +46,9 @@ public class FileIndexer extends AbstractFileIndexer
 	public void index(File file) throws IOException
 	{
 		int[] chunk = new int[getChunkSize()];
+		ILineProcessor[] lprocessors = new ILineProcessor[lineProcessors.size()];
+
+		lprocessors = lineProcessors.toArray(lprocessors);
 
 		//read buffer
 		byte[] buffer = new byte[1024*256];
@@ -89,7 +96,9 @@ outerloop:
 				if(buffer[i] == 10 /*|| bytesInLine > 256*/) //doesn't work when using ReadLine() -> needs buffer.
 				{
 					//optional line processing
-					processLine(lineBuffer, bytesInLine, line);
+					//subtract 1 from line to give a 0 based index
+					for (ILineProcessor processor : lprocessors)
+						processor.processLine(lineBuffer, bytesInLine, line - 1);
 
 					//if the chunk is already full 'send' it and create a new one
 					if(line == chunk.length)
@@ -127,18 +136,13 @@ outerloop:
 		inputStream.close();
 	}
 	
-	/**
-	 * This function is called every time a newline is encountered.
-	 * 
-	 * This is just a stub implementation, override this to add your
-	 * own specific per-line parsing.
-	 * 
-	 * @param lineBuffer the line, as buffer of bytes
-	 * @param length the number of valid characters in the buffer (line length)
-	 * @param lineIndex the line index
-	 */
-	protected void processLine( byte[] lineBuffer, int length, int lineIndex)
-	{
-		// let subclasses do whatever they want here
+	public void addLineProcessor(ILineProcessor processor) {
+		if (processor == null)
+			throw new IllegalArgumentException("processor must not be null");
+		lineProcessors.add(processor);
+	}
+
+	public void removeLineProcessor(ILineProcessor processor) {
+		lineProcessors.remove(processor);
 	}
 }

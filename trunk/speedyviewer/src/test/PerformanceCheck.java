@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import speedyviewer.core.FileIndexer;
+import speedyviewer.core.ILineProcessor;
 
 public class PerformanceCheck
 {
@@ -13,15 +14,10 @@ public class PerformanceCheck
 	 * subclass indexer to test some basic additional parsing
 	 *
 	 */
-	public static class MyIndexer extends FileIndexer
+	public static class Processor implements ILineProcessor
 	{
-		public MyIndexer(int chunkSize)
-		{
-			super(chunkSize);
-		}
-
 		@Override
-		protected void processLine(byte[] lineBuffer, int length, int lineIndex)
+		public void processLine(byte[] lineBuffer, int length, int lineIndex)
 		{
 			if(lineBuffer[0] == 'B' && lineBuffer[1] == 'S')
 			{

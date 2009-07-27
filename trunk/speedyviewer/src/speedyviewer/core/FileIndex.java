@@ -41,7 +41,7 @@ public class FileIndex extends AbstractObservable
 		public void newIndexChunk(AbstractFileIndexer indexer) { }
 
 		@Override
-		public void newPartition(PartitioningFileIndexer indexer, IndexPartition partition)
+		public void newPartition(BeginEndPartitioner indexer, IndexPartition partition)
 		{
 			// add partition to the observable
 			observablePartitionList.add( partition );
