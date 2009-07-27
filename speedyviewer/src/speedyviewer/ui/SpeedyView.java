@@ -4,8 +4,12 @@ import java.io.File;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.custom.SashForm;
@@ -18,7 +22,7 @@ import speedyviewer.core.FileIndexer;
 import speedyviewer.core.IIndexerMonitor;
 import speedyviewer.core.IndexPartition;
 import speedyviewer.core.IndexerThread;
-import speedyviewer.core.PartitioningFileIndexer;
+import speedyviewer.core.BeginEndPartitioner;
 
 
 /**
@@ -33,11 +37,13 @@ public class SpeedyView extends ViewPart
 	private long fileSize;
 	private File file;
 	boolean cancel;
-	private static final String begin = "BS starting";
-	private static final String end   = "BS ASC END";
+	private static final String begin = "!SESSION";
+	private static final String end   = "!SESSION";
+	private BeginEndPartitioner processor;
 	
 	private Action loadFileAction = new Action()
 	{
+
 
 		@Override
 		public void run()
@@ -56,7 +62,11 @@ public class SpeedyView extends ViewPart
 					indexerTh.addListener(null);
 				file = new File(fileName);
 				fileSize = file.length();
-				indexerTh = new IndexerThread(new PartitioningFileIndexer(CHUNK_SIZE, begin, end), file);
+				FileIndexer indexer = new FileIndexer(CHUNK_SIZE);
+				processor = new BeginEndPartitioner(begin, end);
+				indexer.addLineProcessor(processor);
+
+				indexerTh = new IndexerThread(indexer, file);
 				indexerTh.addListener(listener);
 				// if set here, the text in the viewer will grow dynamically, the styled text
 				// does not do that nicely for very large files (many millions of lines)
@@ -120,7 +130,7 @@ public class SpeedyView extends ViewPart
 				@Override
 				public void run()
 				{
-					partitionsViewer.setInput( ((PartitioningFileIndexer)indexerTh.getIndexer()).getPartitions() );
+					partitionsViewer.setInput( processor.getPartitions() );
 					viewer.setContent(new LargeFileContent(file, (FileIndexer)indexerTh.getIndexer()));
 					loadFileAction.setEnabled(true);
 					cancelAction.setEnabled(false);
@@ -164,6 +174,19 @@ public class SpeedyView extends ViewPart
 					return "[" + partition.getFirst() + "," + partition.getLast() + "]";
 				}
 				return super.getText(element);
+			}
+		});
+		
+		partitionsViewer.addOpenListener(new IOpenListener() {
+			@Override
+			public void open(OpenEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+				IndexPartition p = (IndexPartition) selection.getFirstElement();
+				long first = p.getFirst();
+				int offset = indexerTh.getIndexer().getOffsetForLine((int) first);
+				viewer.setCaretOffset(offset);
+				viewer.showSelection();
+				viewer.setFocus();
 			}
 		});
 
